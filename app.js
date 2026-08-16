@@ -12,11 +12,18 @@ const map = L.map('map', {
   zoomControl: false
 });
 
-// Esri World Imagery (Satellite Layer)
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+// Secondary High-Res Satellite Layer (Fallback for Esri 404 gaps)
+const fallbackSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  attribution: 'Tiles &copy; Google'
+}).addTo(map);
+
+// Primary Esri World Imagery Layer
+const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles &copy; Esri',
   maxZoom: 18,
   maxNativeZoom: 15,
+  // Renders a transparent pixel on 404s, letting the underlying fallback show through
   errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 }).addTo(map);
 
