@@ -211,7 +211,7 @@ function copyCoordinates() {
 
   if (!coordsInput || !coordsInput.value || coordsInput.value.includes('Select point')) return;
 
-  // Extract lat, lng prior to the pipe character
+  // Extract lat, lng values before the pipe symbol
   const rawCoords = coordsInput.value.split('|')[0].trim();
 
   navigator.clipboard.writeText(rawCoords).then(() => {
@@ -237,5 +237,4 @@ map.on('moveend', loadStrategicLandmarks);
 
 // Initial Load Execution
 loadStrategicLandmarks();
-
 
