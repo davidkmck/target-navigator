@@ -162,6 +162,7 @@ function resetMapView() {
     duration: 1.2
   });
 }
+
 async function fetchImageryDate(lat, lng) {
   const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/identify?` +
     `geometry=${lng},${lat}` +
@@ -175,8 +176,15 @@ async function fetchImageryDate(lat, lng) {
     const data = await response.json();
 
     if (data.catalogItems && data.catalogItems.features && data.catalogItems.features.length > 0) {
-      const attrs = data.catalogItems.features[0].attributes;
-      const rawDate = attrs.acquisitiondate || attrs.acquisitionDate;
+      // Sort features by acquisitiondate descending to grab the most recent pass
+      const features = data.catalogItems.features;
+      features.sort((a, b) => {
+        const dateA = a.attributes.acquisitiondate || a.attributes.acquisitionDate || 0;
+        const dateB = b.attributes.acquisitiondate || b.attributes.acquisitionDate || 0;
+        return dateB - dateA;
+      });
+
+      const rawDate = features[0].attributes.acquisitiondate || features[0].attributes.acquisitionDate;
       if (rawDate) {
         return new Date(rawDate).toISOString().split('T')[0];
       }
