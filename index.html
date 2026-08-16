@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Target Navigator</title>
 
   <!-- Leaflet CSS -->
@@ -14,32 +14,43 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="hud-panel">
-  <div class="hud-title">
-    <img src="icon.png" alt="Target Navigator Logo">
-    <strong>Target Navigator</strong>
-  </div>
-  <small>Strategic Intelligence Overlay</small>
-  
-<div class="layer-toggles">
-  <label><input type="checkbox" id="toggle-borders" checked onchange="toggleLayer('borders')"> Borders & Cities</label><br/>
-  <label><input type="checkbox" id="toggle-military" checked onchange="toggleLayer('military')"> Strategic Bases</label><br/>
-  <label><input type="checkbox" id="toggle-industrial" checked onchange="toggleLayer('industrial')"> Military-Industrial</label><br/>
-  <label><input type="checkbox" id="toggle-petroleum" checked onchange="toggleLayer('petroleum')"> Petroleum-Industrial</label>
-</div>
+  <div class="hud-panel" id="hud-panel">
+    <div class="hud-header">
+      <div class="hud-title">
+        <img src="icon.png" alt="Target Navigator Logo">
+        <strong>Target Navigator</strong>
+      </div>
+      <button id="hud-toggle-btn" class="hud-toggle-btn" onclick="toggleHudPanel()" title="Minimize / Maximize HUD">−</button>
+    </div>
+    
+    <small class="hud-subtitle">Strategic Intelligence Overlay</small>
 
-  <!-- GPS Coordinates Readout Field -->
-<!-- GPS Coordinates Readout Field with Copy Button -->
-<div class="coords-box">
-  <label for="gps-coords">Coordinates & Date:</label>
-  <div class="coords-input-wrapper">
-    <input type="text" id="gps-coords" value="Select point on map..." readonly onclick="this.select()">
-    <button id="copy-coords-btn" class="copy-btn" onclick="copyCoordinates()" title="Copy GPS Coordinates">📋</button>
+    <div id="hud-controls" class="hud-controls">
+      <div class="layer-toggles">
+        <label><input type="checkbox" id="toggle-borders" checked onchange="toggleLayer('borders')"> Borders & Cities</label><br/>
+        <label><input type="checkbox" id="toggle-military" checked onchange="toggleLayer('military')"> Strategic Bases</label><br/>
+        <label><input type="checkbox" id="toggle-industrial" checked onchange="toggleLayer('industrial')"> Military-Industrial</label><br/>
+        <label><input type="checkbox" id="toggle-petroleum" checked onchange="toggleLayer('petroleum')"> Petroleum-Industrial</label>
+      </div>
+
+      <!-- GPS Coordinates Field with Copy Button -->
+      <div class="coords-box">
+        <label for="gps-coords">Coordinates:</label>
+        <div class="coords-input-wrapper">
+          <input type="text" id="gps-coords" value="Select point on map..." readonly onclick="this.select()">
+          <button id="copy-coords-btn" class="copy-btn" onclick="copyCoordinates()" title="Copy GPS Coordinates">📋</button>
+        </div>
+      </div>
+
+      <!-- Dedicated Imagery Date Readout Box -->
+      <div class="coords-box">
+        <label for="imagery-date">Imagery Capture Date:</label>
+        <input type="text" id="imagery-date" value="Select point on map..." readonly>
+      </div>
+
+      <button class="reset-view-btn" onclick="resetMapView()">🎯 Reset Map Frame</button>
+    </div>
   </div>
-</div>
-  
-  <button class="reset-view-btn" onclick="resetMapView()">🎯 Reset Map Frame</button>
-</div>
 
   <div id="map"></div>
 
@@ -50,13 +61,13 @@
   <script type="module" src="app.js"></script>
 
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
-        .catch((err) => console.error('Service Worker registration failed:', err));
-    });
-  }
-</script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registered successfully:', reg.scope))
+          .catch((err) => console.error('Service Worker registration failed:', err));
+      });
+    }
+  </script>
 </body>
 </html>
