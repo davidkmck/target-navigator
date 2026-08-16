@@ -162,12 +162,14 @@ function resetMapView() {
     duration: 1.2
   });
 }
-
 async function fetchImageryDate(lat, lng) {
-  const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/identify?` +
+  // Query Sentinel-2 footprint features directly at coordinates
+  const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/query?` +
     `geometry=${lng},${lat}` +
     `&geometryType=esriGeometryPoint` +
-    `&sr=4326` +
+    `&spatialRel=esriSpatialRelIntersects` +
+    `&outFields=acquisitiondate` +
+    `&orderByFields=acquisitiondate+DESC` +
     `&returnGeometry=false` +
     `&f=json`;
 
@@ -175,25 +177,18 @@ async function fetchImageryDate(lat, lng) {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.catalogItems && data.catalogItems.features && data.catalogItems.features.length > 0) {
-      // Sort features by acquisitiondate descending to grab the most recent pass
-      const features = data.catalogItems.features;
-      features.sort((a, b) => {
-        const dateA = a.attributes.acquisitiondate || a.attributes.acquisitionDate || 0;
-        const dateB = b.attributes.acquisitiondate || b.attributes.acquisitionDate || 0;
-        return dateB - dateA;
-      });
-
-      const rawDate = features[0].attributes.acquisitiondate || features[0].attributes.acquisitionDate;
+    if (data.features && data.features.length > 0) {
+      const rawDate = data.features[0].attributes.acquisitiondate;
       if (rawDate) {
         return new Date(rawDate).toISOString().split('T')[0];
       }
     }
   } catch (err) {
-    console.error("Sentinel metadata fetch error:", err);
+    console.error("Sentinel metadata query error:", err);
   }
   return "Date Unavailable";
 }
+
 
 // Single Combined Map Click Listener
 map.on('click', async (e) => {
