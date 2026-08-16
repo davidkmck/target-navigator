@@ -12,12 +12,19 @@ const map = L.map('map', {
   zoomControl: false
 });
 
-// Esri World Imagery (Satellite Layer)
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+// Secondary High-Res Satellite Layer (Fallback for Esri 404 gaps)
+const fallbackSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  attribution: 'Tiles &copy; Google'
+}).addTo(map);
+
+// Primary Esri World Imagery Layer
+const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles &copy; Esri',
   maxZoom: 18,
-  maxNativeZoom: 17, // Changed from 15 to 17 for crisp high-resolution detail
-  errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+  maxNativeZoom: 17,
+  // Renders transparent pixel when Esri missing-tile 404s occur, revealing fallback layer beneath
+  errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' 
 }).addTo(map);
 
 // Boundaries & City Labels Layer
