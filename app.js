@@ -67,12 +67,12 @@ function loadStrategicLandmarks() {
     });
 */
     
-    marker.on('click', () => {
-  map.flyTo([site.lat, site.lon], 12, { // Level 12 guarantees tile availability across all regions
-    animate: true,
-    duration: 1.2
-  });
-});
+marker.on('click', () => {
+      map.flyTo([site.lat, site.lon], 10, { // Level 10 ensures sharp imagery and no missing tiles
+        animate: true,
+        duration: 1.2
+      });
+    });
 
     // Add to specific group for toggling
     if (site.type === 'industrial') {
