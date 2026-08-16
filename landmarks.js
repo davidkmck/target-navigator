@@ -53,5 +53,20 @@ const STRATEGIC_LANDMARKS = [
   { name: "Sevmash Shipyard (Severodvinsk - Nuclear Submarines)", lat: 64.5772, lon: 39.8281, type: "industrial", status: "Naval Shipyard" },
   { name: "Admiralty Shipyards (St. Petersburg - Submarines)", lat: 59.9189, lon: 30.2811, type: "industrial", status: "Naval Shipyard" },
   { name: "State Research Institute Kristall (Dzerzhinsk - Explosives)", lat: 56.2411, lon: 43.4356, type: "industrial", status: "Explosives & Munitions" }
-  
+
+  // ================= SIBERIA & CENTRAL RUSSIA =================
+{ name: "Ukrainka Strategic Air Base (Amur Region)", lat: 51.1683, lon: 128.4467, type: "airfield", status: "Tu-95MS Bomber Base" },
+{ name: "Belaya Air Base (Irkutsk)", lat: 52.9150, lon: 103.5750, type: "airfield", status: "Tu-22M3 Bomber Base" },
+{ name: "Tolmachevo Airfield (Novosibirsk)", lat: 55.0125, lon: 82.6506, type: "airfield", status: "Siberian Air Hub" },
+{ name: "Kansk Air Base (Krasnoyarsk)", lat: 56.1242, lon: 95.6603, type: "airfield", status: "Interceptor Base" },
+{ name: "Dombarovsky Air Base (Orenburg)", lat: 51.0928, lon: 59.8517, type: "military", status: "ICBM Silo Base" },
+{ name: "Uzhur ICBM Base (Krasnoyarsk)", lat: 55.2811, lon: 89.8256, type: "military", status: "RS-28 Sarmat Base" },
+
+// ================= RUSSIAN FAR EAST & PACIFIC =================
+{ name: "Petropavlovsk-Kamchatsky Naval Base (Vilyuchinsk)", lat: 52.9231, lon: 158.4839, type: "security", status: "Pacific Submarine Fleet HQ" },
+{ name: "Yelizovo Air Base (Kamchatka)", lat: 53.1678, lon: 158.4539, type: "airfield", status: "Pacific Naval Aviation" },
+{ name: "Komsomolsk-on-Amur Aircraft Plant (KnAAZ)", lat: 50.5925, lon: 137.0817, type: "industrial", status: "Su-57/Su-35 Production" },
+{ name: "Fokino Naval Base (Primorsky Krai)", lat: 42.9739, lon: 132.4042, type: "security", status: "Pacific Fleet Surface Base" },
+{ name: "Anadyr Ugolny Airport (Chukotka)", lat: 64.7350, lon: 177.7411, type: "airfield", status: "Arctic Strategic Base" }
+
 ];
