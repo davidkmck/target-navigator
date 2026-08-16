@@ -148,3 +148,29 @@ body, html {
   background: #0f172a;
 }
 
+.coords-box {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.coords-box label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coords-box input {
+  width: 100%;
+  padding: 6px 8px;
+  background: #0f172a;
+  color: #38bdf8;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
