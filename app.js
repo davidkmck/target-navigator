@@ -132,20 +132,38 @@ function resetMapView() {
   });
 }
 
+
 // Query Esri Imagery Metadata Endpoint for Capture Date
 async function fetchImageryDate(lat, lng) {
-  const url = `https://imagery.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/identify?` + 
-    `geometry=${lng},${lat}&geometryType=esriGeometryPoint&sr=4326&layers=visible&returnGeometry=false&f=json`;
+  // Construct a small bounding box around the clicked point
+  const delta = 0.001;
+  const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
+
+  // Query layer 0 of the Esri World Imagery MapServer
+  const url = `https://imagery.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/0/identify?` +
+    `geometry=${lng},${lat}` +
+    `&geometryType=esriGeometryPoint` +
+    `&sr=4326` +
+    `&layers=all:0` +
+    `&mapExtent=${bbox}` +
+    `&imageDisplay=800,600,96` +
+    `&returnGeometry=false` +
+    `&f=json`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
-    
+
     if (data.results && data.results.length > 0) {
-      const attributes = data.results[0].attributes;
-      // Esri returns the date in 'DATE_ACQUIRED' or 'SRC_DATE' fields
-      const dateStr = attributes.DATE_ACQUIRED || attributes.SRC_DATE || 'Unknown Date';
-      return dateStr;
+      const attrs = data.results[0].attributes;
+      // Esri stores the capture date in NSRC_DATE or DATE_ACQUIRED
+      const rawDate = attrs.NSRC_DATE || attrs.DATE_ACQUIRED || attrs.SRC_DATE;
+      
+      if (rawDate) {
+        // Format timestamp or string to readable format
+        const parsedDate = new Date(isNaN(rawDate) ? rawDate : Number(rawDate));
+        return isNaN(parsedDate.getTime()) ? rawDate : parsedDate.toISOString().split('T')[0];
+      }
     }
   } catch (err) {
     console.error("Failed to retrieve tile metadata:", err);
@@ -153,14 +171,14 @@ async function fetchImageryDate(lat, lng) {
   return "Date Unavailable";
 }
 
-// Update Map Click Handler to Display Date
+// Map Click Listener
 map.on('click', async (e) => {
   const lat = e.latlng.lat.toFixed(5);
   const lng = e.latlng.lng.toFixed(5);
-  
   const coordsInput = document.getElementById('gps-coords');
+
   if (coordsInput) {
-    coordsInput.value = `${lat}, ${lng} (Fetching date...)`;
+    coordsInput.value = `${lat}, ${lng} | Fetching date...`;
   }
 
   const imageDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
@@ -169,6 +187,8 @@ map.on('click', async (e) => {
     coordsInput.value = `${lat}, ${lng} | Date: ${imageDate}`;
   }
 });
+
+
 
 
 window.resetMapView = resetMapView;
