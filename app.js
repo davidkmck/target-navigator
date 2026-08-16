@@ -70,6 +70,14 @@ function loadStrategicLandmarks() {
         direction: 'top' 
       });
 
+    // Tap/Click to smoothly animate and zoom into target coordinates
+    marker.on('click', () => {
+      map.flyTo([site.lat, site.lon], 13, {
+        animate: true,
+        duration: 1.2 // Animation speed in seconds
+      });
+    });
+    
     militaryLandmarksGroup.addLayer(marker);
   });
 }
