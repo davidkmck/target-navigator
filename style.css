@@ -203,3 +203,44 @@ body, html {
 .copy-btn:active {
   background: #0f172a;
 }
+
+/* Header & Minimize Toggle */
+.hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-toggle-btn {
+  background: #1e293b;
+  color: #38bdf8;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.hud-toggle-btn:hover {
+  background: #334155;
+}
+
+.hud-subtitle {
+  display: block;
+  color: #94a3b8;
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+/* Collapsible Section */
+.hud-controls.minimized {
+  display: none !important;
+}
