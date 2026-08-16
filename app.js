@@ -25,28 +25,20 @@ const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/res
   pane: 'overlayPane'
 }).addTo(map);
 
-// Strategic Landmarks Layer Group
+// Create layer groups for targets
 const militaryLandmarksGroup = L.layerGroup().addTo(map);
+const industrialLandmarksGroup = L.layerGroup().addTo(map);
 
-// Render Strategic Landmarks (Max 24 on screen)
 function loadStrategicLandmarks() {
   militaryLandmarksGroup.clearLayers();
+  industrialLandmarksGroup.clearLayers();
 
   if (map.getZoom() < 5) return;
-
-  if (typeof STRATEGIC_LANDMARKS === 'undefined') {
-    console.warn("STRATEGIC_LANDMARKS dataset not loaded.");
-    return;
-  }
+  if (typeof STRATEGIC_LANDMARKS === 'undefined') return;
 
   const bounds = map.getBounds();
 
-  // Filter visible targets within active viewport
-  const visibleLandmarks = STRATEGIC_LANDMARKS.filter(site => {
-    return bounds.contains([site.lat, site.lon]);
-  });
-
-  // Render cap: Max 24 landmarks on screen at once
+  const visibleLandmarks = STRATEGIC_LANDMARKS.filter(site => bounds.contains([site.lat, site.lon]));
   const landmarksToRender = visibleLandmarks.slice(0, 24);
 
   landmarksToRender.forEach(site => {
@@ -54,6 +46,7 @@ function loadStrategicLandmarks() {
     if (site.type === 'airfield') iconEmoji = '🛫';
     else if (site.type === 'intel') iconEmoji = '👁️';
     else if (site.type === 'security') iconEmoji = '🛡️';
+    else if (site.type === 'industrial') iconEmoji = '🏭'; // Defense Industrial Plant
 
     const icon = L.divIcon({
       className: 'landmark-marker',
@@ -62,40 +55,39 @@ function loadStrategicLandmarks() {
       iconAnchor: [12, 12]
     });
 
-    const tooltipContent = `<strong>${site.name}</strong><br/><em>${site.status || 'Strategic Site'}</em>`;
+    const tooltipContent = `<strong>${site.name}</strong><br/><em>${site.status || 'Strategic Facility'}</em>`;
 
     const marker = L.marker([site.lat, site.lon], { icon })
-      .bindTooltip(tooltipContent, { 
-        permanent: false, 
-        direction: 'top' 
-      });
+      .bindTooltip(tooltipContent, { permanent: false, direction: 'top' });
 
-    // Tap/Click to smoothly animate and zoom into target coordinates
     marker.on('click', () => {
-      map.flyTo([site.lat, site.lon], 13, {
-        animate: true,
-        duration: 1.2 // Animation speed in seconds
-      });
+      map.flyTo([site.lat, site.lon], 13, { animate: true, duration: 1.2 });
     });
-    
-    militaryLandmarksGroup.addLayer(marker);
+
+    // Add to specific group for toggling
+    if (site.type === 'industrial') {
+      industrialLandmarksGroup.addLayer(marker);
+    } else {
+      militaryLandmarksGroup.addLayer(marker);
+    }
   });
 }
 
-// Map Event Listeners
-map.on('moveend', loadStrategicLandmarks);
-map.on('zoomend', loadStrategicLandmarks);
-
-// Initial Load
-loadStrategicLandmarks();
-
-// Toggle Handler
+// Updated Toggle Handler
 function toggleLayer(layerType) {
   if (layerType === 'borders') {
     map.hasLayer(bordersAndLabels) ? map.removeLayer(bordersAndLabels) : map.addLayer(bordersAndLabels);
   } else if (layerType === 'military') {
     map.hasLayer(militaryLandmarksGroup) ? map.removeLayer(militaryLandmarksGroup) : map.addLayer(militaryLandmarksGroup);
+  } else if (layerType === 'industrial') {
+    map.hasLayer(industrialLandmarksGroup) ? map.removeLayer(industrialLandmarksGroup) : map.addLayer(industrialLandmarksGroup);
   }
 }
 
 window.toggleLayer = toggleLayer;
+
+
+// Map Event Listeners
+map.on('moveend', loadStrategicLandmarks);
+
+
