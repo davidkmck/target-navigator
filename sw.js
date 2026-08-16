@@ -38,24 +38,24 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event: Cache First, falling back to Network (Works offline for satellite tiles)
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
+
+  // Bypass Service Worker caching for Esri/ArcGIS API metadata queries
+  if (event.request.url.includes('/identify')) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
 
       return fetch(event.request).then((networkResponse) => {
-        // Don't cache invalid responses or non-HTTP(S) schemes
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic' && networkResponse.type !== 'cors') {
+        if (!networkResponse || networkResponse.status !== 200 || 
+           (networkResponse.type !== 'basic' && networkResponse.type !== 'cors')) {
           return networkResponse;
         }
 
-        // Cache fetched satellite map tiles dynamically for offline view
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
@@ -66,3 +66,5 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+
