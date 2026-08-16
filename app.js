@@ -162,19 +162,11 @@ function resetMapView() {
     duration: 1.2
   });
 }
-
-// Query Esri Imagery Metadata Endpoint for Capture Date
 async function fetchImageryDate(lat, lng) {
-  const delta = 0.001;
-  const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
-
-  const url = `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/0/identify?` +
+  const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/identify?` +
     `geometry=${lng},${lat}` +
     `&geometryType=esriGeometryPoint` +
     `&sr=4326` +
-    `&layers=all:0` +
-    `&mapExtent=${bbox}` +
-    `&imageDisplay=800,600,96` +
     `&returnGeometry=false` +
     `&f=json`;
 
@@ -182,20 +174,15 @@ async function fetchImageryDate(lat, lng) {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.results && data.results.length > 0) {
-      const attrs = data.results[0].attributes;
-      
-      // Esri World_Imagery stores capture dates in DATE_ACQUIRED, SRC_DATE2, or AcquisitionDate
-      const rawDate = attrs.DATE_ACQUIRED || attrs.SRC_DATE2 || attrs.AcquisitionDate || attrs.SRC_DATE;
-      
+    if (data.catalogItems && data.catalogItems.features && data.catalogItems.features.length > 0) {
+      const attrs = data.catalogItems.features[0].attributes;
+      const rawDate = attrs.acquisitiondate || attrs.acquisitionDate;
       if (rawDate) {
-        // If Unix timestamp integer (ms), convert to Date
-        const parsedDate = new Date(isNaN(rawDate) ? rawDate : Number(rawDate));
-        return isNaN(parsedDate.getTime()) ? String(rawDate) : parsedDate.toISOString().split('T')[0];
+        return new Date(rawDate).toISOString().split('T')[0];
       }
     }
   } catch (err) {
-    console.error("Failed to retrieve tile metadata:", err);
+    console.error("Sentinel metadata fetch error:", err);
   }
   return "Date Unavailable";
 }
