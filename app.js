@@ -97,16 +97,46 @@ function loadStrategicLandmarks() {
   });
 }
 
-// Map Canvas Click: Updates GPS field when clicking open terrain
-map.on('click', (e) => {
+// Map Click Listener
+map.on('click', async (e) => {
   const lat = e.latlng.lat.toFixed(5);
   const lng = e.latlng.lng.toFixed(5);
   
   const coordsInput = document.getElementById('gps-coords');
+  const dateInput = document.getElementById('imagery-date');
+
   if (coordsInput) {
     coordsInput.value = `${lat}, ${lng}`;
   }
+
+  if (dateInput) {
+    dateInput.value = "Fetching date...";
+  }
+
+  const imageDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
+
+  if (dateInput) {
+    dateInput.value = imageDate;
+  }
 });
+
+// HUD Minimize/Maximize Toggle Handler
+function toggleHudPanel() {
+  const controls = document.getElementById('hud-controls');
+  const toggleBtn = document.getElementById('hud-toggle-btn');
+  
+  if (controls) {
+    controls.classList.toggle('minimized');
+    const isMinimized = controls.classList.contains('minimized');
+    if (toggleBtn) {
+      toggleBtn.innerText = isMinimized ? '+' : '−';
+    }
+  }
+}
+
+// Global Exports
+window.toggleHudPanel = toggleHudPanel;
+
 
 // Toggle Handler
 function toggleLayer(layerType) {
