@@ -184,11 +184,14 @@ async function fetchImageryDate(lat, lng) {
 
     if (data.results && data.results.length > 0) {
       const attrs = data.results[0].attributes;
-      const rawDate = attrs.DATE_ACQUIRED || attrs.NSRC_DATE || attrs.SRC_DATE;
+      
+      // Esri World_Imagery stores capture dates in DATE_ACQUIRED, SRC_DATE2, or AcquisitionDate
+      const rawDate = attrs.DATE_ACQUIRED || attrs.SRC_DATE2 || attrs.AcquisitionDate || attrs.SRC_DATE;
       
       if (rawDate) {
+        // If Unix timestamp integer (ms), convert to Date
         const parsedDate = new Date(isNaN(rawDate) ? rawDate : Number(rawDate));
-        return isNaN(parsedDate.getTime()) ? rawDate : parsedDate.toISOString().split('T')[0];
+        return isNaN(parsedDate.getTime()) ? String(rawDate) : parsedDate.toISOString().split('T')[0];
       }
     }
   } catch (err) {
@@ -197,22 +200,29 @@ async function fetchImageryDate(lat, lng) {
   return "Date Unavailable";
 }
 
-// Map Click Listener
+// Single Combined Map Click Listener
 map.on('click', async (e) => {
   const lat = e.latlng.lat.toFixed(5);
   const lng = e.latlng.lng.toFixed(5);
+  
   const coordsInput = document.getElementById('gps-coords');
+  const dateInput = document.getElementById('imagery-date');
 
   if (coordsInput) {
-    coordsInput.value = `${lat}, ${lng} | Fetching date...`;
+    coordsInput.value = `${lat}, ${lng}`;
+  }
+
+  if (dateInput) {
+    dateInput.value = "Fetching date...";
   }
 
   const imageDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
 
-  if (coordsInput) {
-    coordsInput.value = `${lat}, ${lng} | Date: ${imageDate}`;
+  if (dateInput) {
+    dateInput.value = imageDate;
   }
 });
+
 
 // Copy GPS coordinates to clipboard
 function copyCoordinates() {
