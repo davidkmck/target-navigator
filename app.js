@@ -30,10 +30,13 @@ const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/res
 // Create layer groups for targets
 const militaryLandmarksGroup = L.layerGroup().addTo(map);
 const industrialLandmarksGroup = L.layerGroup().addTo(map);
+const petroleumLandmarksGroup = L.layerGroup().addTo(map); // New Petroleum Group
+
 
 function loadStrategicLandmarks() {
   militaryLandmarksGroup.clearLayers();
   industrialLandmarksGroup.clearLayers();
+  petroleumLandmarksGroup.clearLayers();
 
   if (map.getZoom() < 5) return;
   if (typeof STRATEGIC_LANDMARKS === 'undefined') return;
@@ -49,6 +52,7 @@ function loadStrategicLandmarks() {
     else if (site.type === 'intel') iconEmoji = '👁️';
     else if (site.type === 'security') iconEmoji = '🛡️';
     else if (site.type === 'industrial') iconEmoji = '🏭';
+    else if (site.type === 'petroleum') iconEmoji = '🛢️'; // Petroleum / Fuel Hub
 
     const icon = L.divIcon({
       className: 'landmark-marker',
@@ -78,6 +82,8 @@ function loadStrategicLandmarks() {
     // Add to specific group for toggling
     if (site.type === 'industrial') {
       industrialLandmarksGroup.addLayer(marker);
+    } else if (site.type === 'petroleum') {
+      petroleumLandmarksGroup.addLayer(marker);
     } else {
       militaryLandmarksGroup.addLayer(marker);
     }
@@ -103,6 +109,8 @@ function toggleLayer(layerType) {
     map.hasLayer(militaryLandmarksGroup) ? map.removeLayer(militaryLandmarksGroup) : map.addLayer(militaryLandmarksGroup);
   } else if (layerType === 'industrial') {
     map.hasLayer(industrialLandmarksGroup) ? map.removeLayer(industrialLandmarksGroup) : map.addLayer(industrialLandmarksGroup);
+  } else if (layerType === 'petroleum') {
+    map.hasLayer(petroleumLandmarksGroup) ? map.removeLayer(petroleumLandmarksGroup) : map.addLayer(petroleumLandmarksGroup);
   }
 }
 
