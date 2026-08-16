@@ -52,7 +52,7 @@ const STRATEGIC_LANDMARKS = [
   { name: "Ulan-Ude Aviation Plant (Helicopter Production)", lat: 51.8386, lon: 107.7289, type: "industrial", status: "Helicopter Assembly" },
   { name: "Sevmash Shipyard (Severodvinsk - Nuclear Submarines)", lat: 64.5772, lon: 39.8281, type: "industrial", status: "Naval Shipyard" },
   { name: "Admiralty Shipyards (St. Petersburg - Submarines)", lat: 59.9189, lon: 30.2811, type: "industrial", status: "Naval Shipyard" },
-  { name: "State Research Institute Kristall (Dzerzhinsk - Explosives)", lat: 56.2411, lon: 43.4356, type: "industrial", status: "Explosives & Munitions" }
+  { name: "State Research Institute Kristall (Dzerzhinsk - Explosives)", lat: 56.2411, lon: 43.4356, type: "industrial", status: "Explosives & Munitions" },
 
   // ================= SIBERIA & CENTRAL RUSSIA =================
 { name: "Ukrainka Strategic Air Base (Amur Region)", lat: 51.1683, lon: 128.4467, type: "airfield", status: "Tu-95MS Bomber Base" },
