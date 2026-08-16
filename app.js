@@ -16,7 +16,8 @@ const map = L.map('map', {
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles &copy; Esri',
   maxZoom: 18,
-  maxNativeZoom: 17 // Scales up tiles automatically if higher zoom tiles are missing
+  maxNativeZoom: 15, // Conservative threshold where Esri high-res tiles exist globally
+  errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' // Transparent fallback pixel
 }).addTo(map);
 
 // Boundaries & City Labels Layer
@@ -60,10 +61,18 @@ function loadStrategicLandmarks() {
 
     const marker = L.marker([site.lat, site.lon], { icon })
       .bindTooltip(tooltipContent, { permanent: false, direction: 'top' });
-
+/*
     marker.on('click', () => {
       map.flyTo([site.lat, site.lon], 13, { animate: true, duration: 1.2 });
     });
+*/
+    
+    marker.on('click', () => {
+  map.flyTo([site.lat, site.lon], 12, { // Level 12 guarantees tile availability across all regions
+    animate: true,
+    duration: 1.2
+  });
+});
 
     // Add to specific group for toggling
     if (site.type === 'industrial') {
