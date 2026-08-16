@@ -16,8 +16,8 @@ const map = L.map('map', {
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles &copy; Esri',
   maxZoom: 18,
-  maxNativeZoom: 15, // Conservative threshold where Esri high-res tiles exist globally
-  errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' // Transparent fallback pixel
+  maxNativeZoom: 17, // Changed from 15 to 17 for crisp high-resolution detail
+  errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 }).addTo(map);
 
 // Boundaries & City Labels Layer
