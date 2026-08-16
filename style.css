@@ -112,3 +112,16 @@ body, html {
   font-size: 11px;
   padding: 2px 6px;
 }
+/* App Title Badge Icon */
+.hud-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-title img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+}
