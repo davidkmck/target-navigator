@@ -162,41 +162,26 @@ function resetMapView() {
     duration: 1.2
   });
 }
-
 async function fetchImageryDate(lat, lng) {
-  // Construct a small bounding box envelope around the clicked point
-  const delta = 0.001;
-  const minLng = lng - delta;
-  const minLat = lat - delta;
-  const maxLng = lng + delta;
-  const maxLat = lat + delta;
-
-  const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/query?` +
-    `geometry=${minLng},${minLat},${maxLng},${maxLat}` +
-    `&geometryType=esriGeometryEnvelope` +
-    `&spatialRel=esriSpatialRelIntersects` +
-    `&outFields=acquisitiondate` +
-    `&orderByFields=acquisitiondate+DESC` +
-    `&returnGeometry=false` +
-    `&f=json`;
+  // Query NASA CMR for the latest Sentinel-2 pass over these exact coordinates
+  const url = `https://cmr.earthdata.nasa.gov/search/granules.json?` +
+    `short_name=SENTINEL-2A_MSI_L1C,SENTINEL-2B_MSI_L1C` +
+    `&point=${lng},${lat}` +
+    `&sort_key=-start_date` +
+    `&page_size=1`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.features && data.features.length > 0) {
-      for (const feature of data.features) {
-        const rawDate = feature.attributes.acquisitiondate || feature.attributes.acquisitionDate;
-        if (rawDate) {
-          const parsedDate = new Date(Number(rawDate));
-          if (!isNaN(parsedDate.getTime())) {
-            return parsedDate.toISOString().split('T')[0];
-          }
-        }
+    if (data.feed && data.feed.entry && data.feed.entry.length > 0) {
+      const rawDate = data.feed.entry[0].time_start || data.feed.entry[0].updated;
+      if (rawDate) {
+        return rawDate.split('T')[0]; // Returns clean YYYY-MM-DD
       }
     }
   } catch (err) {
-    console.error("Sentinel metadata query error:", err);
+    console.error("Satellite date fetch error:", err);
   }
   return "Date Unavailable";
 }
