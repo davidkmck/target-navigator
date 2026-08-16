@@ -164,10 +164,16 @@ function resetMapView() {
 }
 
 async function fetchImageryDate(lat, lng) {
-  // Query footprint sub-layer /0/ for individual pass records
-  const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/0/query?` +
-    `geometry=${lng},${lat}` +
-    `&geometryType=esriGeometryPoint` +
+  // Construct a small bounding box envelope around the clicked point
+  const delta = 0.001;
+  const minLng = lng - delta;
+  const minLat = lat - delta;
+  const maxLng = lng + delta;
+  const maxLat = lat + delta;
+
+  const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/query?` +
+    `geometry=${minLng},${minLat},${maxLng},${maxLat}` +
+    `&geometryType=esriGeometryEnvelope` +
     `&spatialRel=esriSpatialRelIntersects` +
     `&outFields=acquisitiondate` +
     `&orderByFields=acquisitiondate+DESC` +
@@ -180,7 +186,7 @@ async function fetchImageryDate(lat, lng) {
 
     if (data.features && data.features.length > 0) {
       for (const feature of data.features) {
-        const rawDate = feature.attributes.acquisitiondate;
+        const rawDate = feature.attributes.acquisitiondate || feature.attributes.acquisitionDate;
         if (rawDate) {
           const parsedDate = new Date(Number(rawDate));
           if (!isNaN(parsedDate.getTime())) {
@@ -194,8 +200,6 @@ async function fetchImageryDate(lat, lng) {
   }
   return "Date Unavailable";
 }
-
-
 
 // Single Combined Map Click Listener
 map.on('click', async (e) => {
