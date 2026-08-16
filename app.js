@@ -115,4 +115,3 @@ window.toggleLayer = toggleLayer;
 // Map Event Listeners
 map.on('moveend', loadStrategicLandmarks);
 
-
