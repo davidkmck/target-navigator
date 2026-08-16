@@ -132,6 +132,45 @@ function resetMapView() {
   });
 }
 
+// Query Esri Imagery Metadata Endpoint for Capture Date
+async function fetchImageryDate(lat, lng) {
+  const url = `https://imagery.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/identify?` + 
+    `geometry=${lng},${lat}&geometryType=esriGeometryPoint&sr=4326&layers=visible&returnGeometry=false&f=json`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.results && data.results.length > 0) {
+      const attributes = data.results[0].attributes;
+      // Esri returns the date in 'DATE_ACQUIRED' or 'SRC_DATE' fields
+      const dateStr = attributes.DATE_ACQUIRED || attributes.SRC_DATE || 'Unknown Date';
+      return dateStr;
+    }
+  } catch (err) {
+    console.error("Failed to retrieve tile metadata:", err);
+  }
+  return "Date Unavailable";
+}
+
+// Update Map Click Handler to Display Date
+map.on('click', async (e) => {
+  const lat = e.latlng.lat.toFixed(5);
+  const lng = e.latlng.lng.toFixed(5);
+  
+  const coordsInput = document.getElementById('gps-coords');
+  if (coordsInput) {
+    coordsInput.value = `${lat}, ${lng} (Fetching date...)`;
+  }
+
+  const imageDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
+
+  if (coordsInput) {
+    coordsInput.value = `${lat}, ${lng} | Date: ${imageDate}`;
+  }
+});
+
+
 window.resetMapView = resetMapView;
 window.toggleLayer = toggleLayer;
 
