@@ -14,20 +14,21 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="hud-panel">
-
-    <div class="hud-title">
+<div class="hud-panel">
+  <div class="hud-title">
     <img src="icon.png" alt="Target Navigator Logo">
     <strong>Target Navigator</strong>
   </div>
-    <small>Strategic Intelligence Overlay</small>
-    
-<div class="layer-toggles">
-  <label><input type="checkbox" id="toggle-borders" checked onchange="toggleLayer('borders')"> Borders & Cities</label><br/>
-  <label><input type="checkbox" id="toggle-military" checked onchange="toggleLayer('military')"> Strategic Bases</label><br/>
-  <label><input type="checkbox" id="toggle-industrial" checked onchange="toggleLayer('industrial')"> Military-Industrial</label>
-</div>
+  <small>Strategic Intelligence Overlay</small>
+  
+  <div class="layer-toggles">
+    <label><input type="checkbox" id="toggle-borders" checked onchange="toggleLayer('borders')"> Borders & Cities</label><br/>
+    <label><input type="checkbox" id="toggle-military" checked onchange="toggleLayer('military')"> Strategic Bases</label><br/>
+    <label><input type="checkbox" id="toggle-industrial" checked onchange="toggleLayer('industrial')"> Military-Industrial</label>
   </div>
+
+  <button class="reset-view-btn" onclick="resetMapView()">🎯 Reset Map Frame</button>
+</div>
 
   <div id="map"></div>
 
