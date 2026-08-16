@@ -1,0 +1,339 @@
+// Initialize Leaflet map centered over Ukraine & Western Russia
+const initialCoords = [49.0, 34.0]; // Centered across Ukraine / Western RU border region
+const map = L.map('map', {
+  center: initialCoords,
+  zoom: 6,            // Zoom level 6 fits all of Ukraine & Western Russia cleanly
+  minZoom: 3,
+  maxZoom: 18,
+  maxBounds: [
+    [-90, -180],
+    [90, 180]
+  ],
+  maxBoundsViscosity: 1.0,
+  zoomControl: false
+});
+
+// Esri World Imagery (Satellite Layer)
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Tiles &copy; Esri',
+  maxZoom: 18
+}).addTo(map);
+
+// Secondary Overlay Layer for Borders & City Labels
+const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Labels &copy; Esri',
+  maxZoom: 18,
+  pane: 'overlayPane' // Ensures labels render above the satellite layer
+}).addTo(map);
+
+// Layer group to hold strategic landmark markers
+const militaryLandmarksGroup = L.layerGroup().addTo(map);
+
+
+const hexLayerGroup = L.layerGroup().addTo(map);
+const unitLayerGroup = L.layerGroup().addTo(map);
+const H3_RESOLUTION = 8; // Hexagon resolution scale (~0.7 km² area per hex)
+
+// State Tracking Variables
+let activeBoardState = {}; 
+let selectedUnitHex = null;
+let validMoveHighlights = [];
+let currentTargetHex = null;
+
+// Dynamic H3 Resolution Scale based on Map Zoom
+function getH3Resolution(zoom) {
+  if (zoom >= 14) return 8; // Tactical detail (~0.7 km² per hex)
+  if (zoom >= 12) return 7; // Medium scale (~5 km² per hex)
+  if (zoom >= 9)  return 6; // Regional scale (~36 km² per hex)
+  if (zoom >= 7)  return 5; // Strategic scale (~250 km² per hex)
+  return 4;                 // Global/Theater view (~1,700 km² per hex)
+}
+
+// Render Strategic Landmarks from local dataset (Max 24 at one time)
+function loadStrategicLandmarks() {
+  militaryLandmarksGroup.clearLayers();
+
+  if (map.getZoom() < 6) return;
+
+  if (typeof STRATEGIC_LANDMARKS === 'undefined') {
+    console.warn("STRATEGIC_LANDMARKS dataset not found.");
+    return;
+  }
+
+  const bounds = map.getBounds();
+
+  // Filter all landmarks from landmarks.js that fall within current map viewport
+  const visibleLandmarks = STRATEGIC_LANDMARKS.filter(site => {
+    return bounds.contains([site.lat, site.lon]);
+  });
+
+  // Render limit cap: no more than 24 on screen at once
+  const landmarksToRender = visibleLandmarks.slice(0, 24);
+
+  const newMarkers = [];
+
+  landmarksToRender.forEach(site => {
+    // Categorized marker icons
+    let iconEmoji = '🪖'; // Default military base
+    if (site.type === 'airfield') iconEmoji = '🛫';
+    else if (site.type === 'intel') iconEmoji = '👁️';
+    else if (site.type === 'security') iconEmoji = '🛡️';
+
+    const icon = L.divIcon({
+      className: 'landmark-marker',
+      html: iconEmoji,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+
+    const marker = L.marker([site.lat, site.lon], { icon })
+      .bindTooltip(site.name, { 
+        permanent: false, 
+        direction: 'top' 
+      });
+
+    newMarkers.push(marker);
+  });
+
+  // Add active view markers to map
+  newMarkers.forEach(m => militaryLandmarksGroup.addLayer(m));
+
+  console.log(`Rendered ${newMarkers.length} strategic landmarks locally (24 viewport limit).`);
+}
+
+
+// Render Map Grid Overlay
+function renderHexGrid() {
+  hexLayerGroup.clearLayers();
+
+  const currentZoom = map.getZoom();
+  const H3_RESOLUTION = getH3Resolution(currentZoom);
+  
+  const bounds = map.getBounds();
+  const bboxPolygon = [
+    [bounds.getSouth(), bounds.getWest()],
+    [bounds.getNorth(), bounds.getWest()],
+    [bounds.getNorth(), bounds.getEast()],
+    [bounds.getSouth(), bounds.getEast()]
+  ];
+
+// Retrieve scaled hexes for viewport
+  const hexes = h3.polygonToCells(bboxPolygon, H3_RESOLUTION);
+
+  // Performance Guard: Skip rendering if zoomed out too far with too many cells
+  if (hexes.length > 600) return;
+
+  hexes.forEach(hexIndex => {
+    const boundary = h3.cellToBoundary(hexIndex);
+    
+    const polygon = L.polygon(boundary, {
+      color: 'rgba(255, 255, 255, 0.35)',
+      weight: 1,
+      fillColor: 'transparent',
+      fillOpacity: 0.1
+    });
+
+    // Attach hex index directly to layer for highlighting
+    polygon.hexIndex = hexIndex;
+
+    // Tap/Click Interaction Logic
+    polygon.on('click', async function() {
+      const currentHex = hexIndex;
+
+      // 1. Execute Movement if destination hex was tapped
+      if (selectedUnitHex && validMoveHighlights.includes(currentHex)) {
+        moveUnit(selectedUnitHex, currentHex);
+        selectedUnitHex = null;
+        clearHighlights();
+        resetMenus();
+        renderBoardUnits();
+        return;
+      }
+
+      // 2. Select Unit if present on hex
+      const hexData = activeBoardState[currentHex];
+      if (hexData && hexData.units && hexData.units.length > 0) {
+        const unit = hexData.units[hexData.units.length - 1]; // Top unit
+        selectedUnitHex = currentHex;
+        
+        const unitStats = UNIT_TYPES[unit.type] || UNIT_TYPES.INFANTRY;
+        highlightValidMoves(currentHex, unitStats.moveRange);
+
+        document.getElementById('selected-hex').innerHTML = `
+          <strong>Selected:</strong> ${unitStats.name} ${unitStats.icon}<br/>
+          <strong>HP:</strong> ${unit.hp} | <strong>Ammo:</strong> ${unit.ammo}<br/>
+          <em>Tap highlighted hex to move</em>
+        `;
+
+        showActionPanel(currentHex);
+        return;
+      }
+
+      // 3. Inspect Open Hex & Fetch Terrain
+      selectedUnitHex = null;
+      clearHighlights();
+      polygon.setStyle({ fillColor: '#38bdf8', fillOpacity: 0.4 });
+      
+      document.getElementById('selected-hex').innerText = `${currentHex.substring(0, 8)}... (Analyzing...)`;
+      
+      const [lat, lng] = h3.cellToLatLng(currentHex);
+      const terrain = await classifyHexTerrain(lat, lng);
+      
+      document.getElementById('selected-hex').innerHTML = `
+        <strong>Hex:</strong> ${currentHex.substring(0, 8)}...<br/>
+        <strong>Terrain:</strong> ${terrain.name}<br/>
+        <strong>Move Cost:</strong> ${terrain.moveCost} | <strong>Defense:</strong> +${terrain.defBonus * 100}%
+      `;
+
+      showActionPanel(currentHex);
+    });
+
+    hexLayerGroup.addLayer(polygon);
+  });
+
+  renderBoardUnits();
+}
+
+// Draw Unit Icons on Map
+function renderBoardUnits() {
+  unitLayerGroup.clearLayers();
+
+  Object.keys(activeBoardState).forEach(hexIndex => {
+    const hexData = activeBoardState[hexIndex];
+    if (hexData.units && hexData.units.length > 0) {
+      const topUnit = hexData.units[hexData.units.length - 1];
+      const unitStats = UNIT_TYPES[topUnit.type] || { icon: '❓' };
+      const [lat, lng] = h3.cellToLatLng(hexIndex);
+
+      const icon = L.divIcon({
+        className: 'unit-marker',
+        html: unitStats.icon,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      const marker = L.marker([lat, lng], { icon: icon, interactive: false });
+      unitLayerGroup.addLayer(marker);
+    }
+  });
+}
+
+// Move Unit Execution
+function moveUnit(fromHex, toHex) {
+  if (!activeBoardState[fromHex] || !activeBoardState[fromHex].units.length) return;
+
+  const unit = activeBoardState[fromHex].units.pop();
+  unit.hasMoved = true;
+
+  if (!activeBoardState[toHex]) {
+    activeBoardState[toHex] = { terrain: 'Plains', owner: unit.owner, units: [] };
+  }
+
+  activeBoardState[toHex].units.push(unit);
+}
+
+// Highlight Movement Targets
+function highlightValidMoves(originHex, moveRange) {
+  clearHighlights();
+  validMoveHighlights = getValidMoves(originHex, moveRange, activeBoardState);
+
+  hexLayerGroup.eachLayer(layer => {
+    if (validMoveHighlights.includes(layer.hexIndex)) {
+      layer.setStyle({ fillColor: '#22c55e', fillOpacity: 0.4 });
+    }
+  });
+}
+
+function clearHighlights() {
+  hexLayerGroup.eachLayer(layer => {
+    layer.setStyle({ fillColor: 'transparent', fillOpacity: 0.1 });
+  });
+}
+
+// UI Menu Handlers
+function showActionPanel(hexIndex) {
+  currentTargetHex = hexIndex;
+  resetMenus();
+  document.getElementById('action-panel').classList.remove('hidden');
+}
+
+function resetMenus() {
+  document.getElementById('action-panel').classList.add('hidden');
+  document.getElementById('deploy-menu').classList.add('hidden');
+  document.getElementById('strike-menu').classList.add('hidden');
+}
+
+function showDeployMenu() {
+  document.getElementById('action-panel').classList.add('hidden');
+  document.getElementById('deploy-menu').classList.remove('hidden');
+}
+
+function showStrikeMenu() {
+  document.getElementById('action-panel').classList.add('hidden');
+  document.getElementById('strike-menu').classList.remove('hidden');
+}
+
+// Deploy Unit Action
+function executeDeploy(unitKey) {
+  if (!currentTargetHex) return;
+
+  spawnUnit(currentTargetHex, unitKey, 'Player_1', activeBoardState);
+  alert(`Deployed ${unitKey} to hex ${currentTargetHex.substring(0, 8)}...`);
+  
+  resetMenus();
+  renderBoardUnits();
+}
+
+// Execute Long-Range Strike
+function executeStrike(weaponType) {
+  if (!currentTargetHex) return;
+
+  const targetHexData = activeBoardState[currentTargetHex];
+  
+  if (targetHexData && targetHexData.units && targetHexData.units.length > 0) {
+    const destroyedUnit = targetHexData.units.pop();
+    alert(`💥 STRIKE CONFIRMED! ${weaponType} destroyed ${destroyedUnit.type} on target hex.`);
+  } else {
+    alert(`🚀 ${weaponType} struck hex ${currentTargetHex.substring(0, 8)}... No units detected.`);
+  }
+
+  resetMenus();
+  renderBoardUnits();
+}
+
+
+// Map Event Listeners
+map.on('moveend', () => {
+  renderHexGrid();
+  loadStrategicLandmarks();
+});
+
+// Re-render when zoom changes
+map.on('zoomend', () => {
+  renderHexGrid();
+  loadStrategicLandmarks();
+});
+
+// Initial load executions
+renderHexGrid();
+loadStrategicLandmarks();
+
+
+// Toggle handler for HTML checkbox controls
+function toggleLayer(layerType) {
+  if (layerType === 'borders') {
+    map.hasLayer(bordersAndLabels) ? map.removeLayer(bordersAndLabels) : map.addLayer(bordersAndLabels);
+  } else if (layerType === 'military') {
+    map.hasLayer(militaryLandmarksGroup) ? map.removeLayer(militaryLandmarksGroup) : map.addLayer(militaryLandmarksGroup);
+  }
+}
+
+window.toggleLayer = toggleLayer;
+
+// Expose UI handlers globally for inline HTML onclick attributes
+window.showActionPanel = showActionPanel;
+window.resetMenus = resetMenus;
+window.showDeployMenu = showDeployMenu;
+window.showStrikeMenu = showStrikeMenu;
+window.executeDeploy = executeDeploy;
+window.executeStrike = executeStrike;
