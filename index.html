@@ -29,10 +29,14 @@
 </div>
 
   <!-- GPS Coordinates Readout Field -->
-  <div class="coords-box">
-    <label for="gps-coords">Coordinates:</label>
+<!-- GPS Coordinates Readout Field with Copy Button -->
+<div class="coords-box">
+  <label for="gps-coords">Coordinates & Date:</label>
+  <div class="coords-input-wrapper">
     <input type="text" id="gps-coords" value="Select point on map..." readonly onclick="this.select()">
+    <button id="copy-coords-btn" class="copy-btn" onclick="copyCoordinates()" title="Copy GPS Coordinates">📋</button>
   </div>
+</div>
   
   <button class="reset-view-btn" onclick="resetMapView()">🎯 Reset Map Frame</button>
 </div>
