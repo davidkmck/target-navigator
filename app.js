@@ -1,6 +1,6 @@
 // Initialize Leaflet map focused over Western Russia & Occupied Territories
 const map = L.map('map', {
-  center: [48.5, 38.0], // Centered over Eastern Ukraine / Donbas / Western RU
+  center: [48.5, 38.0],
   zoom: 7,
   minZoom: 3,
   maxZoom: 18,
@@ -12,19 +12,12 @@ const map = L.map('map', {
   zoomControl: false
 });
 
-// Secondary High-Res Satellite Layer (Fallback for Esri 404 gaps)
-const fallbackSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  attribution: 'Tiles &copy; Google'
-}).addTo(map);
-
-// Primary Esri World Imagery Layer
-const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+// Esri World Imagery (Satellite Layer)
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles &copy; Esri',
   maxZoom: 18,
-  maxNativeZoom: 17,
-  // Renders transparent pixel when Esri missing-tile 404s occur, revealing fallback layer beneath
-  errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' 
+  maxNativeZoom: 15,
+  errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 }).addTo(map);
 
 // Boundaries & City Labels Layer
@@ -55,7 +48,7 @@ function loadStrategicLandmarks() {
     if (site.type === 'airfield') iconEmoji = '🛫';
     else if (site.type === 'intel') iconEmoji = '👁️';
     else if (site.type === 'security') iconEmoji = '🛡️';
-    else if (site.type === 'industrial') iconEmoji = '🏭'; // Defense Industrial Plant
+    else if (site.type === 'industrial') iconEmoji = '🏭';
 
     const icon = L.divIcon({
       className: 'landmark-marker',
@@ -68,17 +61,18 @@ function loadStrategicLandmarks() {
 
     const marker = L.marker([site.lat, site.lon], { icon })
       .bindTooltip(tooltipContent, { permanent: false, direction: 'top' });
-/*
+
+    // Marker Click: Zooms into target site AND populates GPS field with exact coordinates
     marker.on('click', () => {
-      map.flyTo([site.lat, site.lon], 13, { animate: true, duration: 1.2 });
-    });
-*/
-    
-marker.on('click', () => {
-      map.flyTo([site.lat, site.lon], 10, { // Level 10 ensures sharp imagery and no missing tiles
+      map.flyTo([site.lat, site.lon], 10, {
         animate: true,
         duration: 1.2
       });
+
+      const coordsInput = document.getElementById('gps-coords');
+      if (coordsInput) {
+        coordsInput.value = `${site.lat.toFixed(5)}, ${site.lon.toFixed(5)}`;
+      }
     });
 
     // Add to specific group for toggling
@@ -90,8 +84,18 @@ marker.on('click', () => {
   });
 }
 
+// Map Canvas Click: Updates GPS field when clicking open terrain
+map.on('click', (e) => {
+  const lat = e.latlng.lat.toFixed(5);
+  const lng = e.latlng.lng.toFixed(5);
+  
+  const coordsInput = document.getElementById('gps-coords');
+  if (coordsInput) {
+    coordsInput.value = `${lat}, ${lng}`;
+  }
+});
 
-// Updated Toggle Handler
+// Toggle Handler
 function toggleLayer(layerType) {
   if (layerType === 'borders') {
     map.hasLayer(bordersAndLabels) ? map.removeLayer(bordersAndLabels) : map.addLayer(bordersAndLabels);
@@ -102,11 +106,10 @@ function toggleLayer(layerType) {
   }
 }
 
-// Initial Map Configuration Constants
+// Map Configuration Constants
 const INITIAL_CENTER = [48.5, 38.0];
 const INITIAL_ZOOM = 7;
 
-// Function to reset map back to initial starting position
 function resetMapView() {
   map.flyTo(INITIAL_CENTER, INITIAL_ZOOM, {
     animate: true,
@@ -115,10 +118,10 @@ function resetMapView() {
 }
 
 window.resetMapView = resetMapView;
-
 window.toggleLayer = toggleLayer;
 
-
-// Map Event Listeners
+// Event Listeners
 map.on('moveend', loadStrategicLandmarks);
 
+// Initial Load Execution
+loadStrategicLandmarks();
