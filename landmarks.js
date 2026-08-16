@@ -41,5 +41,17 @@ const STRATEGIC_LANDMARKS = [
   { name: "Rosgvardiya Southern District HQ (Rostov)", lat: 47.2357, lon: 39.7015, type: "security", status: "Russian Federation" },
   { name: "Rosgvardiya Center (Voronezh)", lat: 51.6617, lon: 39.2003, type: "security", status: "Russian Federation" },
   { name: "GRU 22nd Spetsnaz Brigade Base (Stepnoy)", lat: 47.3072, lon: 39.8731, type: "military", status: "Russian Federation" },
-  { name: "GRU 10th Spetsnaz Brigade Base (Molkino)", lat: 44.6292, lon: 39.1350, type: "military", status: "Russian Federation" }
+  { name: "GRU 10th Spetsnaz Brigade Base (Molkino)", lat: 44.6292, lon: 39.1350, type: "military", status: "Russian Federation" },
+
+  // ================= MILITARY-INDUSTRIAL LANDMARKS =================
+  { name: "Votkinsk Machine Building Plant (Iskander/ICBM)", lat: 57.0506, lon: 54.0017, type: "industrial", status: "Missile Production" },
+  { name: "Uralvagonzavod (Nizhny Tagil - Tank Production)", lat: 57.9069, lon: 60.0864, type: "industrial", status: "Armor Manufacturing" },
+  { name: "Kurganmashzavod (Kurgan - BMP Production)", lat: 55.4514, lon: 65.3211, type: "industrial", status: "Armored Vehicles" },
+  { name: "Almaz-Antey Avangard Plant (Moscow - SAM Missiles)", lat: 55.8344, lon: 37.5028, type: "industrial", status: "Air Defense Assembly" },
+  { name: "Kazan Aviation Plant (Tupolev Bomber Production)", lat: 55.8561, lon: 49.1239, type: "industrial", status: "Aerospace Assembly" },
+  { name: "Ulan-Ude Aviation Plant (Helicopter Production)", lat: 51.8386, lon: 107.7289, type: "industrial", status: "Helicopter Assembly" },
+  { name: "Sevmash Shipyard (Severodvinsk - Nuclear Submarines)", lat: 64.5772, lon: 39.8281, type: "industrial", status: "Naval Shipyard" },
+  { name: "Admiralty Shipyards (St. Petersburg - Submarines)", lat: 59.9189, lon: 30.2811, type: "industrial", status: "Naval Shipyard" },
+  { name: "State Research Institute Kristall (Dzerzhinsk - Explosives)", lat: 56.2411, lon: 43.4356, type: "industrial", status: "Explosives & Munitions" }
+  
 ];
