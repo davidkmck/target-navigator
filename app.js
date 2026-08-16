@@ -131,16 +131,15 @@ function resetMapView() {
     duration: 1.2
   });
 }
-
-
 // Query Esri Imagery Metadata Endpoint for Capture Date
 async function fetchImageryDate(lat, lng) {
-  // Construct a small bounding box around the clicked point
+  // Construct a small bounding box (minLng, minLat, maxLng, maxLat)
   const delta = 0.001;
   const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
 
-  // Query layer 0 of the Esri World Imagery MapServer
-  const url = `https://imagery.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/0/identify?` +
+  // Use server.arcgisonline.com (has proper CORS headers enabled for JSON)
+  // Geometry format MUST be longitude,latitude (x,y)
+  const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/0/identify?` +
     `geometry=${lng},${lat}` +
     `&geometryType=esriGeometryPoint` +
     `&sr=4326` +
@@ -151,16 +150,15 @@ async function fetchImageryDate(lat, lng) {
     `&f=json`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { mode: 'cors' });
     const data = await response.json();
 
     if (data.results && data.results.length > 0) {
       const attrs = data.results[0].attributes;
-      // Esri stores the capture date in NSRC_DATE or DATE_ACQUIRED
-      const rawDate = attrs.NSRC_DATE || attrs.DATE_ACQUIRED || attrs.SRC_DATE;
+      // Esri stores capture dates in DATE_ACQUIRED, NSRC_DATE, or SRC_DATE
+      const rawDate = attrs.DATE_ACQUIRED || attrs.NSRC_DATE || attrs.SRC_DATE;
       
       if (rawDate) {
-        // Format timestamp or string to readable format
         const parsedDate = new Date(isNaN(rawDate) ? rawDate : Number(rawDate));
         return isNaN(parsedDate.getTime()) ? rawDate : parsedDate.toISOString().split('T')[0];
       }
