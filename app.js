@@ -83,6 +83,7 @@ function loadStrategicLandmarks() {
   });
 }
 
+
 // Updated Toggle Handler
 function toggleLayer(layerType) {
   if (layerType === 'borders') {
@@ -93,6 +94,20 @@ function toggleLayer(layerType) {
     map.hasLayer(industrialLandmarksGroup) ? map.removeLayer(industrialLandmarksGroup) : map.addLayer(industrialLandmarksGroup);
   }
 }
+
+// Initial Map Configuration Constants
+const INITIAL_CENTER = [48.5, 38.0];
+const INITIAL_ZOOM = 7;
+
+// Function to reset map back to initial starting position
+function resetMapView() {
+  map.flyTo(INITIAL_CENTER, INITIAL_ZOOM, {
+    animate: true,
+    duration: 1.2
+  });
+}
+
+window.resetMapView = resetMapView;
 
 window.toggleLayer = toggleLayer;
 
