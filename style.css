@@ -28,13 +28,46 @@ body, html {
   backdrop-filter: blur(4px);
 }
 
+/* App Title Badge Icon */
+.hud-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-title img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
 /* Unit Marker Styles */
 .unit-marker {
   font-size: 20px;
   text-align: center;
   line-height: 24px;
-  pointer-events: none; /* Allows clicks to pass through to the hex polygon beneath */
+  pointer-events: none;
   filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.8));
+}
+
+.landmark-marker {
+  font-size: 20px;
+  line-height: 20px;
+  text-align: center;
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.9));
+  pointer-events: auto;
+  z-index: 1000 !important;
+  cursor: pointer;
+}
+
+.leaflet-tooltip {
+  background: rgba(15, 23, 42, 0.9);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 6px;
 }
 
 /* Action Panel & Buttons */
@@ -94,38 +127,6 @@ body, html {
   color: #cbd5e1;
 }
 
-.landmark-marker {
-  font-size: 20px;
-  line-height: 20px;
-  text-align: center;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.9));
-  pointer-events: auto;
-  z-index: 1000 !important;
-  cursor: pointer;
-}
-
-.leaflet-tooltip {
-  background: rgba(15, 23, 42, 0.9);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  font-size: 11px;
-  padding: 2px 6px;
-}
-/* App Title Badge Icon */
-.hud-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.hud-title img {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
-}
-
 .reset-view-btn {
   margin-top: 10px;
   width: 100%;
@@ -148,11 +149,19 @@ body, html {
   background: #0f172a;
 }
 
+/* Coordinates & Clipboard Box */
 .coords-box {
   margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.coords-box label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .coords-input-wrapper {
@@ -194,23 +203,3 @@ body, html {
 .copy-btn:active {
   background: #0f172a;
 }
-
-.coords-box label {
-  font-size: 11px;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.coords-box input {
-  width: 100%;
-  padding: 6px 8px;
-  background: #0f172a;
-  color: #38bdf8;
-  border: 1px solid #334155;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 12px;
-  box-sizing: border-box;
-}
-
