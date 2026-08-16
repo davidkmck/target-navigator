@@ -131,15 +131,15 @@ function resetMapView() {
     duration: 1.2
   });
 }
+
 // Query Esri Imagery Metadata Endpoint for Capture Date
 async function fetchImageryDate(lat, lng) {
   // Construct a small bounding box (minLng, minLat, maxLng, maxLat)
   const delta = 0.001;
   const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
 
-  // Use server.arcgisonline.com (has proper CORS headers enabled for JSON)
-  // Geometry format MUST be longitude,latitude (x,y)
-  const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/0/identify?` +
+  // Valid hostname: services.arcgisonline.com
+  const url = `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/0/identify?` +
     `geometry=${lng},${lat}` +
     `&geometryType=esriGeometryPoint` +
     `&sr=4326` +
@@ -150,7 +150,7 @@ async function fetchImageryDate(lat, lng) {
     `&f=json`;
 
   try {
-    const response = await fetch(url, { mode: 'cors' });
+    const response = await fetch(url);
     const data = await response.json();
 
     if (data.results && data.results.length > 0) {
@@ -168,6 +168,7 @@ async function fetchImageryDate(lat, lng) {
   }
   return "Date Unavailable";
 }
+
 
 // Map Click Listener
 map.on('click', async (e) => {
