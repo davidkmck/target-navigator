@@ -125,6 +125,27 @@ function toggleLayer(layerType) {
 const INITIAL_CENTER = [48.5, 38.0];
 const INITIAL_ZOOM = 7;
 
+.copy-btn {
+  padding: 5px 8px;
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  background: #334155;
+  border-color: #38bdf8;
+}
+
+.copy-btn:active {
+  background: #0f172a;
+}
+
 function resetMapView() {
   map.flyTo(INITIAL_CENTER, INITIAL_ZOOM, {
     animate: true,
