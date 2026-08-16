@@ -155,11 +155,9 @@ function resetMapView() {
 
 // Query Esri Imagery Metadata Endpoint for Capture Date
 async function fetchImageryDate(lat, lng) {
-  // Construct a small bounding box (minLng, minLat, maxLng, maxLat)
   const delta = 0.001;
   const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
 
-  // Valid hostname: services.arcgisonline.com
   const url = `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/0/identify?` +
     `geometry=${lng},${lat}` +
     `&geometryType=esriGeometryPoint` +
@@ -176,7 +174,6 @@ async function fetchImageryDate(lat, lng) {
 
     if (data.results && data.results.length > 0) {
       const attrs = data.results[0].attributes;
-      // Esri stores capture dates in DATE_ACQUIRED, NSRC_DATE, or SRC_DATE
       const rawDate = attrs.DATE_ACQUIRED || attrs.NSRC_DATE || attrs.SRC_DATE;
       
       if (rawDate) {
@@ -189,7 +186,6 @@ async function fetchImageryDate(lat, lng) {
   }
   return "Date Unavailable";
 }
-
 
 // Map Click Listener
 map.on('click', async (e) => {
@@ -208,14 +204,38 @@ map.on('click', async (e) => {
   }
 });
 
+// Copy GPS coordinates to clipboard
+function copyCoordinates() {
+  const coordsInput = document.getElementById('gps-coords');
+  const copyBtn = document.getElementById('copy-coords-btn');
 
+  if (!coordsInput || !coordsInput.value || coordsInput.value.includes('Select point')) return;
 
+  // Extract lat, lng prior to the pipe character
+  const rawCoords = coordsInput.value.split('|')[0].trim();
 
+  navigator.clipboard.writeText(rawCoords).then(() => {
+    if (copyBtn) {
+      const originalText = copyBtn.innerText;
+      copyBtn.innerText = '✅';
+      setTimeout(() => {
+        copyBtn.innerText = originalText;
+      }, 1500);
+    }
+  }).catch(err => {
+    console.error('Failed to copy coordinates:', err);
+  });
+}
+
+// Global Exports
 window.resetMapView = resetMapView;
 window.toggleLayer = toggleLayer;
+window.copyCoordinates = copyCoordinates;
 
 // Event Listeners
 map.on('moveend', loadStrategicLandmarks);
 
 // Initial Load Execution
 loadStrategicLandmarks();
+
+
