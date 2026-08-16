@@ -27,6 +27,12 @@
     <label><input type="checkbox" id="toggle-industrial" checked onchange="toggleLayer('industrial')"> Military-Industrial</label>
   </div>
 
+  <!-- GPS Coordinates Readout Field -->
+  <div class="coords-box">
+    <label for="gps-coords">Coordinates:</label>
+    <input type="text" id="gps-coords" value="Select point on map..." readonly onclick="this.select()">
+  </div>
+  
   <button class="reset-view-btn" onclick="resetMapView()">🎯 Reset Map Frame</button>
 </div>
 
