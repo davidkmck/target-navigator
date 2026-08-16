@@ -162,9 +162,10 @@ function resetMapView() {
     duration: 1.2
   });
 }
+
 async function fetchImageryDate(lat, lng) {
-  // Query Sentinel-2 footprint features directly at coordinates
-  const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/query?` +
+  // Query footprint sub-layer /0/ for individual pass records
+  const url = `https://sentinel.arcgis.com/arcgis/rest/services/Sentinel2/ImageServer/0/query?` +
     `geometry=${lng},${lat}` +
     `&geometryType=esriGeometryPoint` +
     `&spatialRel=esriSpatialRelIntersects` +
@@ -178,9 +179,14 @@ async function fetchImageryDate(lat, lng) {
     const data = await response.json();
 
     if (data.features && data.features.length > 0) {
-      const rawDate = data.features[0].attributes.acquisitiondate;
-      if (rawDate) {
-        return new Date(rawDate).toISOString().split('T')[0];
+      for (const feature of data.features) {
+        const rawDate = feature.attributes.acquisitiondate;
+        if (rawDate) {
+          const parsedDate = new Date(Number(rawDate));
+          if (!isNaN(parsedDate.getTime())) {
+            return parsedDate.toISOString().split('T')[0];
+          }
+        }
       }
     }
   } catch (err) {
@@ -188,6 +194,7 @@ async function fetchImageryDate(lat, lng) {
   }
   return "Date Unavailable";
 }
+
 
 
 // Single Combined Map Click Listener
