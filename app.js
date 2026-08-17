@@ -141,16 +141,14 @@ async function fetchImageryDate(lat, lng) {
 }
 */
 
-// Marker Click: Zooms into target site AND populates GPS field with exact coordinates
-marker.on('click', () => {
-  map.flyTo([site.lat, site.lon], 14, { // Increased zoom level from 10 to 14
-    animate: true,
-    duration: 1.2
-  });
-
+// Map Click Listener - Populates GPS field with clicked coordinates
+map.on('click', (e) => {
+  const lat = e.latlng.lat.toFixed(5);
+  const lng = e.latlng.lng.toFixed(5);
+  
   const coordsInput = document.getElementById('gps-coords');
   if (coordsInput) {
-    coordsInput.value = `${site.lat.toFixed(5)}, ${site.lon.toFixed(5)}`;
+    coordsInput.value = `${lat}, ${lng}`;
   }
 });
 
