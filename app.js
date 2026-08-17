@@ -33,33 +33,30 @@ const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/res
   pane: 'overlayPane'
 }).addTo(map);
 
-// Create layer groups for targets
-const militaryLandmarksGroup = L.layerGroup().addTo(map);
-const industrialLandmarksGroup = L.layerGroup().addTo(map);
-const petroleumLandmarksGroup = L.layerGroup().addTo(map);
-const navalLandmarksGroup = L.layerGroup().addTo(map);
-const trainingLandmarksGroup = L.layerGroup().addTo(map);
-const hybridLandmarksGroup = L.layerGroup().addTo(map);
-const leadershipLandmarksGroup = L.layerGroup().addTo(map);
+// Layer Groups
+const layerGroups = {
+  military: L.layerGroup().addTo(map),
+  industrial: L.layerGroup().addTo(map),
+  petroleum: L.layerGroup().addTo(map),
+  naval: L.layerGroup().addTo(map),
+  training: L.layerGroup().addTo(map),
+  hybrid: L.layerGroup().addTo(map),
+  leadership: L.layerGroup().addTo(map)
+};
 
 function loadStrategicLandmarks() {
-  militaryLandmarksGroup.clearLayers();
-  industrialLandmarksGroup.clearLayers();
-  petroleumLandmarksGroup.clearLayers();
-  navalLandmarksGroup.clearLayers();
-  trainingLandmarksGroup.clearLayers();
-  hybridLandmarksGroup.clearLayers();
-  leadershipLandmarksGroup.clearLayers();
+  // Clear existing markers from all layer groups
+  Object.values(layerGroups).forEach(group => group.clearLayers());
 
   if (map.getZoom() < 5) return;
   if (typeof STRATEGIC_LANDMARKS === 'undefined') return;
 
   const bounds = map.getBounds();
 
+  // Filter visible markers
   const visibleLandmarks = STRATEGIC_LANDMARKS.filter(site => bounds.contains([site.lat, site.lon]));
-  const landmarksToRender = visibleLandmarks.slice(0, 24);
 
-  landmarksToRender.forEach(site => {
+  visibleLandmarks.forEach(site => {
     let iconEmoji = '🪖';
     if (site.type === 'airfield') iconEmoji = '🛫';
     else if (site.type === 'intel') iconEmoji = '👁️';
@@ -83,7 +80,6 @@ function loadStrategicLandmarks() {
     const marker = L.marker([site.lat, site.lon], { icon })
       .bindTooltip(tooltipContent, { permanent: false, direction: 'top' });
 
-    // Marker Click: Zooms into target site AND populates GPS field with exact coordinates
     marker.on('click', () => {
       map.flyTo([site.lat, site.lon], 10, {
         animate: true,
@@ -96,22 +92,15 @@ function loadStrategicLandmarks() {
       }
     });
 
-    // Add to specific group for toggling
-    if (site.type === 'industrial') {
-      industrialLandmarksGroup.addLayer(marker);
-    } else if (site.type === 'petroleum') {
-      petroleumLandmarksGroup.addLayer(marker);
-    } else if (site.type === 'naval') {
-      navalLandmarksGroup.addLayer(marker);
-    } else if (site.type === 'training') {
-      trainingLandmarksGroup.addLayer(marker);
-    } else if (site.type === 'hybrid') {
-      hybridLandmarksGroup.addLayer(marker);
-    } else if (site.type === 'leadership') {
-      leadershipLandmarksGroup.addLayer(marker);
-    } else {
-      militaryLandmarksGroup.addLayer(marker);
+    // Assign to corresponding group based on site.type
+    let targetGroup = layerGroups.military;
+    if (layerGroups[site.type]) {
+      targetGroup = layerGroups[site.type];
+    } else if (site.type === 'airfield' || site.type === 'intel' || site.type === 'security') {
+      targetGroup = layerGroups.military;
     }
+
+    targetGroup.addLayer(marker);
   });
 }
 
@@ -126,20 +115,13 @@ async function fetchImageryDate(lat, lng) {
     collections: ['SENTINEL-2'],
     bbox: bbox,
     limit: 1,
-    sortby: [
-      {
-        field: 'properties.datetime',
-        direction: 'desc'
-      }
-    ]
+    sortby: [{ field: 'properties.datetime', direction: 'desc' }]
   };
 
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bodyData)
     });
 
@@ -148,7 +130,7 @@ async function fetchImageryDate(lat, lng) {
     if (data.features && data.features.length > 0) {
       const rawDate = data.features[0].properties.datetime;
       if (rawDate) {
-        return rawDate.split('T')[0]; // Returns clean YYYY-MM-DD date
+        return rawDate.split('T')[0];
       }
     }
   } catch (err) {
@@ -165,19 +147,12 @@ map.on('click', async (e) => {
   const coordsInput = document.getElementById('gps-coords');
   const dateInput = document.getElementById('imagery-date');
 
-  if (coordsInput) {
-    coordsInput.value = `${lat}, ${lng}`;
-  }
-
-  if (dateInput) {
-    dateInput.value = "Fetching Copernicus date...";
-  }
+  if (coordsInput) coordsInput.value = `${lat}, ${lng}`;
+  if (dateInput) dateInput.value = "Fetching Copernicus date...";
 
   const captureDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
 
-  if (dateInput) {
-    dateInput.value = captureDate;
-  }
+  if (dateInput) dateInput.value = captureDate;
 });
 
 // HUD Minimize/Maximize Toggle Handler
@@ -198,20 +173,16 @@ function toggleHudPanel() {
 function toggleLayer(layerType) {
   if (layerType === 'borders') {
     map.hasLayer(bordersAndLabels) ? map.removeLayer(bordersAndLabels) : map.addLayer(bordersAndLabels);
-  } else if (layerType === 'military') {
-    map.hasLayer(militaryLandmarksGroup) ? map.removeLayer(militaryLandmarksGroup) : map.addLayer(militaryLandmarksGroup);
-  } else if (layerType === 'industrial') {
-    map.hasLayer(industrialLandmarksGroup) ? map.removeLayer(industrialLandmarksGroup) : map.addLayer(industrialLandmarksGroup);
-  } else if (layerType === 'petroleum') {
-    map.hasLayer(petroleumLandmarksGroup) ? map.removeLayer(petroleumLandmarksGroup) : map.addLayer(petroleumLandmarksGroup);
-  } else if (layerType === 'naval') {
-    map.hasLayer(navalLandmarksGroup) ? map.removeLayer(navalLandmarksGroup) : map.addLayer(navalLandmarksGroup);
-  } else if (layerType === 'training') {
-    map.hasLayer(trainingLandmarksGroup) ? map.removeLayer(trainingLandmarksGroup) : map.addLayer(trainingLandmarksGroup);
-  } else if (layerType === 'hybrid') {
-    map.hasLayer(hybridLandmarksGroup) ? map.removeLayer(hybridLandmarksGroup) : map.addLayer(hybridLandmarksGroup);
-  } else if (layerType === 'leadership') {
-    map.hasLayer(leadershipLandmarksGroup) ? map.removeLayer(leadershipLandmarksGroup) : map.addLayer(leadershipLandmarksGroup);
+    return;
+  }
+
+  const group = layerGroups[layerType];
+  if (group) {
+    if (map.hasLayer(group)) {
+      map.removeLayer(group);
+    } else {
+      map.addLayer(group);
+    }
   }
 }
 
