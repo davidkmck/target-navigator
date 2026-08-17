@@ -139,20 +139,17 @@ async function fetchImageryDate(lat, lng) {
   return "Date Unavailable";
 }
 
-// Map Click Listener
-map.on('click', async (e) => {
-  const lat = e.latlng.lat.toFixed(5);
-  const lng = e.latlng.lng.toFixed(5);
-  
+// Marker Click: Zooms into target site AND populates GPS field with exact coordinates
+marker.on('click', () => {
+  map.flyTo([site.lat, site.lon], 14, { // Increased zoom level from 10 to 14
+    animate: true,
+    duration: 1.2
+  });
+
   const coordsInput = document.getElementById('gps-coords');
-  const dateInput = document.getElementById('imagery-date');
-
-  if (coordsInput) coordsInput.value = `${lat}, ${lng}`;
-  if (dateInput) dateInput.value = "Fetching Copernicus date...";
-
-  const captureDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
-
-  if (dateInput) dateInput.value = captureDate;
+  if (coordsInput) {
+    coordsInput.value = `${site.lat.toFixed(5)}, ${site.lon.toFixed(5)}`;
+  }
 });
 
 // HUD Minimize/Maximize Toggle Handler
