@@ -95,20 +95,34 @@ function loadStrategicLandmarks() {
   });
 }
 
-// Query Copernicus STAC API directly for the latest Sentinel-2 acquisition date
+// Query Copernicus STAC API directly via POST request
 async function fetchImageryDate(lat, lng) {
-  // Construct a small bounding box (minLng, minLat, maxLng, maxLat)
   const delta = 0.005;
-  const bbox = `[${lng - delta},${lat - delta},${lng + delta},${lat + delta}]`;
+  const bbox = [lng - delta, lat - delta, lng + delta, lat + delta];
 
-  const url = `https://catalogue.dataspace.copernicus.eu/stac/search?` +
-    `collections=SENTINEL-2` +
-    `&bbox=${bbox}` +
-    `&limit=1` +
-    `&sortby=-datetime`;
+  const url = 'https://catalogue.dataspace.copernicus.eu/stac/search';
+
+  const bodyData = {
+    collections: ['SENTINEL-2'],
+    bbox: bbox,
+    limit: 1,
+    sortby: [
+      {
+        field: 'properties.datetime',
+        direction: 'desc'
+      }
+    ]
+  };
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(bodyData)
+    });
+
     const data = await response.json();
 
     if (data.features && data.features.length > 0) {
@@ -122,7 +136,6 @@ async function fetchImageryDate(lat, lng) {
   }
   return "Date Unavailable";
 }
-
 
 // Map Click Listener
 map.on('click', async (e) => {
