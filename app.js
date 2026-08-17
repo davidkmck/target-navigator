@@ -37,11 +37,19 @@ const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/res
 const militaryLandmarksGroup = L.layerGroup().addTo(map);
 const industrialLandmarksGroup = L.layerGroup().addTo(map);
 const petroleumLandmarksGroup = L.layerGroup().addTo(map);
+const navalLandmarksGroup = L.layerGroup().addTo(map);
+const trainingLandmarksGroup = L.layerGroup().addTo(map);
+const hybridLandmarksGroup = L.layerGroup().addTo(map);
+const leadershipLandmarksGroup = L.layerGroup().addTo(map);
 
 function loadStrategicLandmarks() {
   militaryLandmarksGroup.clearLayers();
   industrialLandmarksGroup.clearLayers();
   petroleumLandmarksGroup.clearLayers();
+  navalLandmarksGroup.clearLayers();
+  trainingLandmarksGroup.clearLayers();
+  hybridLandmarksGroup.clearLayers();
+  leadershipLandmarksGroup.clearLayers();
 
   if (map.getZoom() < 5) return;
   if (typeof STRATEGIC_LANDMARKS === 'undefined') return;
@@ -58,6 +66,10 @@ function loadStrategicLandmarks() {
     else if (site.type === 'security') iconEmoji = '🛡️';
     else if (site.type === 'industrial') iconEmoji = '🏭';
     else if (site.type === 'petroleum') iconEmoji = '🛢️';
+    else if (site.type === 'naval') iconEmoji = '⚓';
+    else if (site.type === 'training') iconEmoji = '🎯';
+    else if (site.type === 'hybrid') iconEmoji = '⚙️';
+    else if (site.type === 'leadership') iconEmoji = '🏛️';
 
     const icon = L.divIcon({
       className: 'landmark-marker',
@@ -89,6 +101,14 @@ function loadStrategicLandmarks() {
       industrialLandmarksGroup.addLayer(marker);
     } else if (site.type === 'petroleum') {
       petroleumLandmarksGroup.addLayer(marker);
+    } else if (site.type === 'naval') {
+      navalLandmarksGroup.addLayer(marker);
+    } else if (site.type === 'training') {
+      trainingLandmarksGroup.addLayer(marker);
+    } else if (site.type === 'hybrid') {
+      hybridLandmarksGroup.addLayer(marker);
+    } else if (site.type === 'leadership') {
+      leadershipLandmarksGroup.addLayer(marker);
     } else {
       militaryLandmarksGroup.addLayer(marker);
     }
@@ -184,6 +204,14 @@ function toggleLayer(layerType) {
     map.hasLayer(industrialLandmarksGroup) ? map.removeLayer(industrialLandmarksGroup) : map.addLayer(industrialLandmarksGroup);
   } else if (layerType === 'petroleum') {
     map.hasLayer(petroleumLandmarksGroup) ? map.removeLayer(petroleumLandmarksGroup) : map.addLayer(petroleumLandmarksGroup);
+  } else if (layerType === 'naval') {
+    map.hasLayer(navalLandmarksGroup) ? map.removeLayer(navalLandmarksGroup) : map.addLayer(navalLandmarksGroup);
+  } else if (layerType === 'training') {
+    map.hasLayer(trainingLandmarksGroup) ? map.removeLayer(trainingLandmarksGroup) : map.addLayer(trainingLandmarksGroup);
+  } else if (layerType === 'hybrid') {
+    map.hasLayer(hybridLandmarksGroup) ? map.removeLayer(hybridLandmarksGroup) : map.addLayer(hybridLandmarksGroup);
+  } else if (layerType === 'leadership') {
+    map.hasLayer(leadershipLandmarksGroup) ? map.removeLayer(leadershipLandmarksGroup) : map.addLayer(leadershipLandmarksGroup);
   }
 }
 
