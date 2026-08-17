@@ -162,26 +162,34 @@ function resetMapView() {
     duration: 1.2
   });
 }
+
 async function fetchImageryDate(lat, lng) {
-  // Query NASA CMR for the latest Sentinel-2 pass over these exact coordinates
-  const url = `https://cmr.earthdata.nasa.gov/search/granules.json?` +
-    `short_name=SENTINEL-2A_MSI_L1C,SENTINEL-2B_MSI_L1C` +
-    `&point=${lng},${lat}` +
-    `&sort_key=-start_date` +
-    `&page_size=1`;
+  // Construct a small bounding box (minLng, minLat, maxLng, maxLat)
+  const delta = 0.005;
+  const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
+
+  // Query Sentinel Hub WFS Catalog for Sentinel-2 L1C acquisitions
+  const url = `https://creodias.sentinel-hub.com/ogc/wfs/81938814-7221-4f36-96a8-62283a04297b?` +
+    `REQUEST=GetFeature` +
+    `&TYPENAMES=S2.TILE` +
+    `&BBOX=${bbox}` +
+    `&OUTPUTFORMAT=application/json` +
+    `&MAXFEATURES=1`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.feed && data.feed.entry && data.feed.entry.length > 0) {
-      const rawDate = data.feed.entry[0].time_start || data.feed.entry[0].updated;
+    if (data.features && data.features.length > 0) {
+      const properties = data.features[0].properties;
+      // Extract date string from sensing time
+      const rawDate = properties.sensingTime || properties.date || properties.time;
       if (rawDate) {
-        return rawDate.split('T')[0]; // Returns clean YYYY-MM-DD
+        return rawDate.split('T')[0];
       }
     }
   } catch (err) {
-    console.error("Satellite date fetch error:", err);
+    console.error("Sentinel Hub catalog fetch error:", err);
   }
   return "Date Unavailable";
 }
