@@ -23,7 +23,6 @@ const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/s
   attribution: 'Tiles &copy; Esri',
   maxZoom: 18,
   maxNativeZoom: 15,
-  // Renders a transparent pixel on 404s, letting the underlying fallback show through
   errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 }).addTo(map);
 
@@ -37,8 +36,7 @@ const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/res
 // Create layer groups for targets
 const militaryLandmarksGroup = L.layerGroup().addTo(map);
 const industrialLandmarksGroup = L.layerGroup().addTo(map);
-const petroleumLandmarksGroup = L.layerGroup().addTo(map); // New Petroleum Group
-
+const petroleumLandmarksGroup = L.layerGroup().addTo(map);
 
 function loadStrategicLandmarks() {
   militaryLandmarksGroup.clearLayers();
@@ -59,7 +57,7 @@ function loadStrategicLandmarks() {
     else if (site.type === 'intel') iconEmoji = '👁️';
     else if (site.type === 'security') iconEmoji = '🛡️';
     else if (site.type === 'industrial') iconEmoji = '🏭';
-    else if (site.type === 'petroleum') iconEmoji = '🛢️'; // Petroleum / Fuel Hub
+    else if (site.type === 'petroleum') iconEmoji = '🛢️';
 
     const icon = L.divIcon({
       className: 'landmark-marker',
@@ -98,7 +96,7 @@ function loadStrategicLandmarks() {
 }
 
 // Map Click Listener
-map.on('click', async (e) => {
+map.on('click', (e) => {
   const lat = e.latlng.lat.toFixed(5);
   const lng = e.latlng.lng.toFixed(5);
   
@@ -109,14 +107,13 @@ map.on('click', async (e) => {
     coordsInput.value = `${lat}, ${lng}`;
   }
 
-  if (dateInput) {
-    dateInput.value = "Fetching date...";
-  }
-
-  const imageDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
+  // Generate Sentinel Hub EO Browser URL for the clicked coordinates
+  const sentinelUrl = `https://apps.sentinel-hub.com/eo-browser/?zoom=14&lat=${lat}&lng=${lng}&themeId=DEFAULT-THEME`;
 
   if (dateInput) {
-    dateInput.value = imageDate;
+    dateInput.value = "Open Satellite Timeline ↗";
+    dateInput.style.cursor = "pointer";
+    dateInput.onclick = () => window.open(sentinelUrl, '_blank');
   }
 });
 
@@ -133,10 +130,6 @@ function toggleHudPanel() {
     }
   }
 }
-
-// Global Exports
-window.toggleHudPanel = toggleHudPanel;
-
 
 // Toggle Handler
 function toggleLayer(layerType) {
@@ -155,68 +148,12 @@ function toggleLayer(layerType) {
 const INITIAL_CENTER = [48.5, 38.0];
 const INITIAL_ZOOM = 7;
 
-
 function resetMapView() {
   map.flyTo(INITIAL_CENTER, INITIAL_ZOOM, {
     animate: true,
     duration: 1.2
   });
 }
-
-async function fetchImageryDate(lat, lng) {
-  // Construct a small bounding box (minLng, minLat, maxLng, maxLat)
-  const delta = 0.005;
-  const bbox = `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
-
-  // Query Sentinel Hub WFS Catalog for Sentinel-2 L1C acquisitions
-  const url = `https://creodias.sentinel-hub.com/ogc/wfs/81938814-7221-4f36-96a8-62283a04297b?` +
-    `REQUEST=GetFeature` +
-    `&TYPENAMES=S2.TILE` +
-    `&BBOX=${bbox}` +
-    `&OUTPUTFORMAT=application/json` +
-    `&MAXFEATURES=1`;
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.features && data.features.length > 0) {
-      const properties = data.features[0].properties;
-      // Extract date string from sensing time
-      const rawDate = properties.sensingTime || properties.date || properties.time;
-      if (rawDate) {
-        return rawDate.split('T')[0];
-      }
-    }
-  } catch (err) {
-    console.error("Sentinel Hub catalog fetch error:", err);
-  }
-  return "Date Unavailable";
-}
-
-// Single Combined Map Click Listener
-map.on('click', async (e) => {
-  const lat = e.latlng.lat.toFixed(5);
-  const lng = e.latlng.lng.toFixed(5);
-  
-  const coordsInput = document.getElementById('gps-coords');
-  const dateInput = document.getElementById('imagery-date');
-
-  if (coordsInput) {
-    coordsInput.value = `${lat}, ${lng}`;
-  }
-
-  if (dateInput) {
-    dateInput.value = "Fetching date...";
-  }
-
-  const imageDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
-
-  if (dateInput) {
-    dateInput.value = imageDate;
-  }
-});
-
 
 // Copy GPS coordinates to clipboard
 function copyCoordinates() {
@@ -225,8 +162,7 @@ function copyCoordinates() {
 
   if (!coordsInput || !coordsInput.value || coordsInput.value.includes('Select point')) return;
 
-  // Extract lat, lng values before the pipe symbol
-  const rawCoords = coordsInput.value.split('|')[0].trim();
+  const rawCoords = coordsInput.value.trim();
 
   navigator.clipboard.writeText(rawCoords).then(() => {
     if (copyBtn) {
@@ -242,6 +178,7 @@ function copyCoordinates() {
 }
 
 // Global Exports
+window.toggleHudPanel = toggleHudPanel;
 window.resetMapView = resetMapView;
 window.toggleLayer = toggleLayer;
 window.copyCoordinates = copyCoordinates;
@@ -251,4 +188,3 @@ map.on('moveend', loadStrategicLandmarks);
 
 // Initial Load Execution
 loadStrategicLandmarks();
-
