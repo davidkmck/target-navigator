@@ -104,6 +104,7 @@ function loadStrategicLandmarks() {
   });
 }
 
+/* not working - maybe something to look into another time
 // Query Copernicus STAC API directly via POST request
 async function fetchImageryDate(lat, lng) {
   const delta = 0.005;
@@ -138,6 +139,7 @@ async function fetchImageryDate(lat, lng) {
   }
   return "Date Unavailable";
 }
+*/
 
 // Marker Click: Zooms into target site AND populates GPS field with exact coordinates
 marker.on('click', () => {
