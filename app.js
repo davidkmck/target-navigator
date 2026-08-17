@@ -95,8 +95,37 @@ function loadStrategicLandmarks() {
   });
 }
 
+// Query Copernicus STAC API directly for the latest Sentinel-2 acquisition date
+async function fetchImageryDate(lat, lng) {
+  // Construct a small bounding box (minLng, minLat, maxLng, maxLat)
+  const delta = 0.005;
+  const bbox = `[${lng - delta},${lat - delta},${lng + delta},${lat + delta}]`;
+
+  const url = `https://catalogue.dataspace.copernicus.eu/stac/search?` +
+    `collections=SENTINEL-2` +
+    `&bbox=${bbox}` +
+    `&limit=1` +
+    `&sortby=-datetime`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.features && data.features.length > 0) {
+      const rawDate = data.features[0].properties.datetime;
+      if (rawDate) {
+        return rawDate.split('T')[0]; // Returns clean YYYY-MM-DD date
+      }
+    }
+  } catch (err) {
+    console.error("Copernicus STAC catalog error:", err);
+  }
+  return "Date Unavailable";
+}
+
+
 // Map Click Listener
-map.on('click', (e) => {
+map.on('click', async (e) => {
   const lat = e.latlng.lat.toFixed(5);
   const lng = e.latlng.lng.toFixed(5);
   
@@ -107,13 +136,14 @@ map.on('click', (e) => {
     coordsInput.value = `${lat}, ${lng}`;
   }
 
-  // Generate Sentinel Hub EO Browser URL for the clicked coordinates
-  const sentinelUrl = `https://apps.sentinel-hub.com/eo-browser/?zoom=14&lat=${lat}&lng=${lng}&themeId=DEFAULT-THEME`;
+  if (dateInput) {
+    dateInput.value = "Fetching Copernicus date...";
+  }
+
+  const captureDate = await fetchImageryDate(e.latlng.lat, e.latlng.lng);
 
   if (dateInput) {
-    dateInput.value = "Open Satellite Timeline ↗";
-    dateInput.style.cursor = "pointer";
-    dateInput.onclick = () => window.open(sentinelUrl, '_blank');
+    dateInput.value = captureDate;
   }
 });
 
