@@ -81,7 +81,7 @@ function loadStrategicLandmarks() {
       .bindTooltip(tooltipContent, { permanent: false, direction: 'top' });
 
     marker.on('click', () => {
-      map.flyTo([site.lat, site.lon], 10, {
+      map.flyTo([site.lat, site.lon], 14, {
         animate: true,
         duration: 1.2
       });
