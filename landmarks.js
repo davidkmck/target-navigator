@@ -80,5 +80,13 @@ const STRATEGIC_LANDMARKS = [
   { name: "Ust-Luga Oil Terminal & Complex", lat: 59.6833, lon: 28.4000, type: "petroleum", status: "Baltic Sea Export Terminal" },
   { name: "Yaroslavl Oil Refinery (Slavneft)", lat: 57.5483, lon: 39.8167, type: "petroleum", status: "Strategic Fuel Production" },
   { name: "Ilsky Oil Refinery (Krasnodar)", lat: 44.8625, lon: 38.5639, type: "petroleum", status: "Regional Fuel Processing" },
-  { name: "Feodosia Oil Depot (Crimea)", lat: 45.0411, lon: 35.3850, type: "petroleum", status: "Occupied Crimea Fuel Hub" }
+  { name: "Feodosia Oil Depot (Crimea)", lat: 45.0411, lon: 35.3850, type: "petroleum", status: "Occupied Crimea Fuel Hub" },
+
+  // ================= BIOLOGICAL & CHEMICAL RESEARCH =================
+    { name: "VECTOR Institute (Koltsovo)", lat: 54.9380, lon: 83.2266, type: "biochemical", status: "Biodefense & Virology Lab" },
+    { name: "48th Central Research Institute (Sergiyev Posad-6)", lat: 56.2575, lon: 38.1150, type: "biochemical", status: "Military Virology Center" },
+    { name: "48th Central Research Institute (Yekaterinburg / Compound 19)", lat: 56.7795, lon: 60.5906, type: "biochemical", status: "Military Bacteriology Center" },
+    { name: "33rd Central Research & Testing Institute (Shikhany)", lat: 52.1167, lon: 47.2000, type: "biochemical", status: "Chemical Weapons Research" },
+    { name: "State Research Center for Applied Microbiology (Obolensk)", lat: 54.9827, lon: 37.2296, type: "biochemical", status: "Bio-Research Facility" },
+    { name: "48th Central Research Institute (Kirov)", lat: 58.6035, lon: 49.6679, type: "biochemical", status: "Military Biological Defense" }
 ];
