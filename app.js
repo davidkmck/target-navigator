@@ -42,7 +42,7 @@ const layerGroups = {
   training: L.layerGroup().addTo(map),
   hybrid: L.layerGroup().addTo(map),
   leadership: L.layerGroup().addTo(map),
-  biiochemical: L.layerGroup().addTo(map),
+  biiochemical: L.layerGroup().addTo(map)
 };
 
 function loadStrategicLandmarks() {
