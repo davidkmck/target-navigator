@@ -67,6 +67,7 @@ function loadStrategicLandmarks() {
     else if (site.type === 'training') iconEmoji = '🎯';
     else if (site.type === 'hybrid') iconEmoji = '⚙️';
     else if (site.type === 'leadership') iconEmoji = '🏛️';
+    else if (site.type === 'biochemical') iconEmoji = '☣️';
 
     const icon = L.divIcon({
       className: 'landmark-marker',
