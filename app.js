@@ -1,25 +1,4 @@
-// Initialize Leaflet map focused over Western Russia & Occupied Territories
-const map = L.map('map', {
-  center: [48.5, 38.0],
-  zoom: 7,
-  minZoom: 3,
-  maxZoom: 18,
-  maxBounds: [
-    [-90, -180],
-    [90, 180]
-  ],
-  maxBoundsViscosity: 1.0,
-  zoomControl: false
-});
-
-// Secondary High-Res Satellite Layer (Fallback for Esri 404 gaps)
-const fallbackSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  attribution: 'Tiles &copy; Google'
-}).addTo(map);
-
-
-// 1. Define your different tile layers
+// 1. Define your different base tile layers FIRST
 const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: 'Tiles &copy; Esri'
 });
@@ -34,19 +13,19 @@ const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y
     attribution: '&copy; OpenStreetMap contributors'
 });
 
-// Boundaries & City Labels Layer
-const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Labels &copy; Esri',
-  maxZoom: 18,
-  pane: 'overlayPane'
-}).addTo(map);
-
-
-// 2. Initialize the map with one default layer
+// 2. Initialize Leaflet map focused over Western Russia & Occupied Territories ONCE
 const map = L.map('map', {
-    center: [57.46520, 41.46910],
-    zoom: 15,
-    layers: [esriSatellite] // Default imagery
+  center: [48.5, 38.0],
+  zoom: 7,
+  minZoom: 3,
+  maxZoom: 18,
+  maxBounds: [
+    [-90, -180],
+    [90, 180]
+  ],
+  maxBoundsViscosity: 1.0,
+  zoomControl: false,
+  layers: [esriSatellite] // Set your default imagery here
 });
 
 // 3. Group your base maps for the control toggle
@@ -59,13 +38,14 @@ const baseMaps = {
 // 4. Add the layer control to the map
 L.control.layers(baseMaps).addTo(map);
 
+// 5. Boundaries & City Labels Layer (Overlay)
+const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Labels &copy; Esri',
+  maxZoom: 18,
+  pane: 'overlayPane'
+}).addTo(map);
 
-
-
-
-
-
-// Layer Groups
+// --- Layer Groups ---
 const layerGroups = {
   military: L.layerGroup().addTo(map),
   industrial: L.layerGroup().addTo(map),
@@ -102,7 +82,7 @@ function loadStrategicLandmarks() {
     else if (site.type === 'hybrid') iconEmoji = '⚙️';
     else if (site.type === 'leadership') iconEmoji = '🏛️';
     else if (site.type === 'biochemical') iconEmoji = '☣️';
-    else if (site.type === 'palace') iconEmoji = '🏰'; // <--- Add this line
+    else if (site.type === 'palace') iconEmoji = '🏰'; 
 
     const icon = L.divIcon({
       className: 'landmark-marker',
@@ -150,7 +130,7 @@ function setAllLayers(state) {
         if (box.checked !== state) {
             box.checked = state;
             
-            // Extract the category name from the ID (e.g., 'toggle-biochemical' becomes 'biochemical')
+            // Extract the category name from the ID
             const layerType = box.id.replace('toggle-', '');
             
             // Call your existing layer toggle function
@@ -161,45 +141,7 @@ function setAllLayers(state) {
     });
 }
 
-// Ensure it's globally available for the HTML buttons
 window.setAllLayers = setAllLayers;
-
-/* not working - maybe something to look into another time
-// Query Copernicus STAC API directly via POST request
-async function fetchImageryDate(lat, lng) {
-  const delta = 0.005;
-  const bbox = [lng - delta, lat - delta, lng + delta, lat + delta];
-
-  const url = 'https://catalogue.dataspace.copernicus.eu/stac/search';
-
-  const bodyData = {
-    collections: ['SENTINEL-2'],
-    bbox: bbox,
-    limit: 1,
-    sortby: [{ field: 'properties.datetime', direction: 'desc' }]
-  };
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bodyData)
-    });
-
-    const data = await response.json();
-
-    if (data.features && data.features.length > 0) {
-      const rawDate = data.features[0].properties.datetime;
-      if (rawDate) {
-        return rawDate.split('T')[0];
-      }
-    }
-  } catch (err) {
-    console.error("Copernicus STAC catalog error:", err);
-  }
-  return "Date Unavailable";
-}
-*/
 
 // Map Click Listener - Populates GPS field with clicked coordinates
 map.on('click', (e) => {
@@ -278,7 +220,7 @@ function copyCoordinates() {
 
 // --- Search Feature ---
 async function handleSearch() {
-    const searchInput = document.getElementById('search-input'); // Make sure your HTML has this ID
+    const searchInput = document.getElementById('search-input');
     if (!searchInput) return;
 
     const query = searchInput.value.trim();
@@ -293,7 +235,7 @@ async function handleSearch() {
         if (localMatch) {
             // Local match found! Fly to it.
             map.flyTo([localMatch.lat, localMatch.lon], 14, { animate: true, duration: 1.2 });
-            return; // Exit function so it doesn't trigger the API fallback
+            return; 
         }
     }
 
@@ -307,14 +249,8 @@ async function handleSearch() {
             const lat = parseFloat(data[0].lat);
             const lon = parseFloat(data[0].lon);
 
-            // Fly to the searched coordinates (zoomed out slightly compared to a specific landmark)
+            // Fly to the searched coordinates
             map.flyTo([lat, lon], 12, { animate: true, duration: 1.2 });
-
-            // Optional: Drop a temporary marker so the user sees exactly what was found
-            // L.marker([lat, lon]).addTo(map)
-            //   .bindPopup(`<strong>Search result:</strong><br>${data[0].display_name}`)
-            //   .openPopup();
-            
         } else {
             console.warn("Location not found.");
             alert("Location not found locally or globally.");
@@ -325,9 +261,7 @@ async function handleSearch() {
     }
 }
 
-// Export it to window so your HTML UI buttons can call it (like your other functions)
 window.handleSearch = handleSearch;
-
 
 // Global Exports
 window.toggleHudPanel = toggleHudPanel;
