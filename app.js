@@ -18,13 +18,21 @@ const fallbackSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y=
   attribution: 'Tiles &copy; Google'
 }).addTo(map);
 
-// Primary Esri World Imagery Layer
+
+// 1. Define your different tile layers
 const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Tiles &copy; Esri',
-  maxZoom: 18,
-  maxNativeZoom: 15,
-  errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-}).addTo(map);
+    attribution: 'Tiles &copy; Esri'
+});
+
+const googleSatellite = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+    maxZoom: 20,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: 'Tiles &copy; Google'
+});
+
+const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+});
 
 // Boundaries & City Labels Layer
 const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
@@ -32,6 +40,29 @@ const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/res
   maxZoom: 18,
   pane: 'overlayPane'
 }).addTo(map);
+
+
+// 2. Initialize the map with one default layer
+const map = L.map('map', {
+    center: [57.46520, 41.46910],
+    zoom: 15,
+    layers: [esriSatellite] // Default imagery
+});
+
+// 3. Group your base maps for the control toggle
+const baseMaps = {
+    "Esri World Imagery": esriSatellite,
+    "Google Satellite": googleSatellite,
+    "OpenStreetMap": openStreetMap
+};
+
+// 4. Add the layer control to the map
+L.control.layers(baseMaps).addTo(map);
+
+
+
+
+
 
 
 // Layer Groups
