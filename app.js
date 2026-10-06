@@ -41,7 +41,8 @@ const layerGroups = {
   naval: L.layerGroup().addTo(map),
   training: L.layerGroup().addTo(map),
   hybrid: L.layerGroup().addTo(map),
-  leadership: L.layerGroup().addTo(map)
+  leadership: L.layerGroup().addTo(map),
+  biiochemical: L.layerGroup().addTo(map),
 };
 
 function loadStrategicLandmarks() {
