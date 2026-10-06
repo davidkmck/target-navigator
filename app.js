@@ -33,6 +33,7 @@ const bordersAndLabels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/res
   pane: 'overlayPane'
 }).addTo(map);
 
+
 // Layer Groups
 const layerGroups = {
   military: L.layerGroup().addTo(map),
@@ -42,7 +43,8 @@ const layerGroups = {
   training: L.layerGroup().addTo(map),
   hybrid: L.layerGroup().addTo(map),
   leadership: L.layerGroup().addTo(map),
-  biochemical: L.layerGroup().addTo(map)
+  biochemical: L.layerGroup().addTo(map),
+  palace: L.layerGroup().addTo(map) 
 };
 
 function loadStrategicLandmarks() {
@@ -69,6 +71,7 @@ function loadStrategicLandmarks() {
     else if (site.type === 'hybrid') iconEmoji = '⚙️';
     else if (site.type === 'leadership') iconEmoji = '🏛️';
     else if (site.type === 'biochemical') iconEmoji = '☣️';
+    else if (site.type === 'palace') iconEmoji = '🏰'; // <--- Add this line
 
     const icon = L.divIcon({
       className: 'landmark-marker',
