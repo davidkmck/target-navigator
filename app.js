@@ -216,6 +216,59 @@ function copyCoordinates() {
   });
 }
 
+// --- Search Feature ---
+async function handleSearch() {
+    const searchInput = document.getElementById('search-input'); // Make sure your HTML has this ID
+    if (!searchInput) return;
+
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    // 1. Check existing STRATEGIC_LANDMARKS first
+    if (typeof STRATEGIC_LANDMARKS !== 'undefined') {
+        const localMatch = STRATEGIC_LANDMARKS.find(site => 
+            site.name.toLowerCase().includes(query.toLowerCase())
+        );
+
+        if (localMatch) {
+            // Local match found! Fly to it.
+            map.flyTo([localMatch.lat, localMatch.lon], 14, { animate: true, duration: 1.2 });
+            return; // Exit function so it doesn't trigger the API fallback
+        }
+    }
+
+    // 2. Fallback to OpenStreetMap Nominatim API for actual map search
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+
+            // Fly to the searched coordinates (zoomed out slightly compared to a specific landmark)
+            map.flyTo([lat, lon], 12, { animate: true, duration: 1.2 });
+
+            // Optional: Drop a temporary marker so the user sees exactly what was found
+            // L.marker([lat, lon]).addTo(map)
+            //   .bindPopup(`<strong>Search result:</strong><br>${data[0].display_name}`)
+            //   .openPopup();
+            
+        } else {
+            console.warn("Location not found.");
+            alert("Location not found locally or globally.");
+        }
+    } catch (error) {
+        console.error("Geocoding search error:", error);
+        alert("Search failed. Please try again later.");
+    }
+}
+
+// Export it to window so your HTML UI buttons can call it (like your other functions)
+window.handleSearch = handleSearch;
+
+
 // Global Exports
 window.toggleHudPanel = toggleHudPanel;
 window.resetMapView = resetMapView;
@@ -224,6 +277,15 @@ window.copyCoordinates = copyCoordinates;
 
 // Event Listeners
 map.on('moveend', loadStrategicLandmarks);
+
+const searchBox = document.getElementById('search-input');
+if (searchBox) {
+    searchBox.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    });
+}
 
 // Initial Load Execution
 loadStrategicLandmarks();
