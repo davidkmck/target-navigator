@@ -88,5 +88,13 @@ const STRATEGIC_LANDMARKS = [
     { name: "48th Central Research Institute (Yekaterinburg / Compound 19)", lat: 56.7795, lon: 60.5906, type: "biochemical", status: "Military Bacteriology Center" },
     { name: "33rd Central Research & Testing Institute (Shikhany)", lat: 52.1167, lon: 47.2000, type: "biochemical", status: "Chemical Weapons Research" },
     { name: "State Research Center for Applied Microbiology (Obolensk)", lat: 54.9827, lon: 37.2296, type: "biochemical", status: "Bio-Research Facility" },
-    { name: "48th Central Research Institute (Kirov)", lat: 58.6035, lon: 49.6679, type: "biochemical", status: "Military Biological Defense" }
+    { name: "48th Central Research Institute (Kirov)", lat: 58.6035, lon: 49.6679, type: "biochemical", status: "Military Biological Defense" },
+
+  // ================= PALACES & LEADERSHIP RESIDENCES =================
+    { name: "Putin's Palace (Cape Idokopas)", lat: 44.4198, lon: 38.2052, type: "palace", status: "Presidential Estate (Gelendzhik)" },
+    { name: "Valdai Presidential Residence", lat: 58.0111, lon: 33.3166, type: "palace", status: "Dolgiye Borody Lake Estate" },
+    { name: "Novo-Ogaryovo", lat: 55.7335, lon: 37.1982, type: "palace", status: "Official Presidential Residence" },
+    { name: "Bocharov Ruchey", lat: 43.6166, lon: 39.7027, type: "palace", status: "Presidential Summer Residence (Sochi)" },
+    { name: "Milovka Estate (Dmitry Medvedev)", lat: 57.4652, lon: 41.4691, type: "palace", status: "Oligarch / Insider Estate (Ples)" },
+    { name: "Rotenberg Mansions (Odintsovo)", lat: 55.7478, lon: 37.2243, type: "palace", status: "Oligarch / Insider Estate (Rublyovka)" }
 ];
