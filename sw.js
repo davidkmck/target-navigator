@@ -1,4 +1,4 @@
-const CACHE_NAME = 'target-navigator-v8';
+const CACHE_NAME = 'target-navigator-v9';
 
 // Assets to cache immediately on install
 const PRECACHE_ASSETS = [
