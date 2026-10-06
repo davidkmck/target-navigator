@@ -1,4 +1,4 @@
-const CACHE_NAME = 'target-navigator-v7';
+const CACHE_NAME = 'target-navigator-v8';
 
 // Assets to cache immediately on install
 const PRECACHE_ASSETS = [
@@ -8,6 +8,7 @@ const PRECACHE_ASSETS = [
   './app.js',
   './landmarks.js',
   './icon.png',
+  './icon-192.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
 ];
