@@ -15,17 +15,25 @@
 </head>
 <body>
   <div class="hud-panel" id="hud-panel">
-    <div class="hud-header">
-      <div class="hud-title">
-        <img src="icon.png" alt="Target Navigator Logo">
-        <strong>Target Navigator</strong><br/>
-      </div>
-      
-      <input type="text" id="search-input" placeholder="Search locations...">
-      <button onclick="handleSearch()">Search</button>
-      
-      <button id="hud-toggle-btn" class="hud-toggle-btn" onclick="toggleHudPanel()" title="Minimize / Maximize HUD">−</button>
+    
+<div class="hud-header" style="display: flex; flex-direction: column; gap: 10px;">
+  
+  <!-- Row 1: Search Bar -->
+  <div style="display: flex; gap: 5px; width: 100%;">
+    <input type="text" id="search-input" placeholder="Search locations..." style="flex-grow: 1; padding: 4px;">
+    <button onclick="handleSearch()">Search</button>
+  </div>
+  
+  <!-- Row 2: Title & Minimize Toggle -->
+  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <div class="hud-title" style="margin: 0;">
+      <img src="icon.png" alt="Target Navigator Logo">
+      <strong>Target Navigator</strong>
     </div>
+    <button id="hud-toggle-btn" class="hud-toggle-btn" onclick="toggleHudPanel()" title="Minimize / Maximize HUD">−</button>
+  </div>
+
+</div>
     
     <small class="hud-subtitle">Strategic Intelligence Overlay</small>
 
