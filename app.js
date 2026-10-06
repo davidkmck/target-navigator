@@ -105,6 +105,30 @@ function loadStrategicLandmarks() {
   });
 }
 
+// --- Category Panel Controls ---
+function setAllLayers(state) {
+    // Select all checkboxes used for map layers
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="toggle-"]');
+    
+    checkboxes.forEach(box => {
+        // Only trigger an update if the checkbox is actually changing
+        if (box.checked !== state) {
+            box.checked = state;
+            
+            // Extract the category name from the ID (e.g., 'toggle-biochemical' becomes 'biochemical')
+            const layerType = box.id.replace('toggle-', '');
+            
+            // Call your existing layer toggle function
+            if (typeof toggleLayer === 'function') {
+                toggleLayer(layerType);
+            }
+        }
+    });
+}
+
+// Ensure it's globally available for the HTML buttons
+window.setAllLayers = setAllLayers;
+
 /* not working - maybe something to look into another time
 // Query Copernicus STAC API directly via POST request
 async function fetchImageryDate(lat, lng) {
